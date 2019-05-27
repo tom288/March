@@ -31,6 +31,7 @@ GLFWwindow* makeWindow()
 
    window = glfwCreateWindow(WIN_W, WIN_H, ":D", nullptr, nullptr);
    glfwMakeContextCurrent(window);
+   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
    if (!VSYNC)
    {
@@ -38,6 +39,12 @@ GLFWwindow* makeWindow()
       glfwSwapInterval(0);
    }
 
+   if (RAW_INPUT && glfwRawMouseMotionSupported())
+   {
+      // Disable mouse accel
+      glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+      std::cout << "Raw input is enabled!" << std::endl;
+   }
    // TODO read input
    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
    // glfwSetKeyCallback(window, keyCB);

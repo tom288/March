@@ -11,4 +11,7 @@
 // Anti-aliasing multiplier
 #define AA_X 16
 
+// Enable unscaled and unaccelerated mouse input
+#define RAW_INPUT 1
+
 #endif

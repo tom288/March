@@ -49,8 +49,7 @@ class Shader
       }
       catch (std::ifstream::failure &e)
       {
-         // TODO improve wording, add filenames
-         std::cout << "ERROR: Shader files not read successfully" << std::endl;
+         std::cout << "ERROR: Error reading from shader files" << std::endl;
       }
 
       const char* vShaderCode = vertCode.c_str();
@@ -152,6 +151,7 @@ class Shader
 
 private:
 
+   // Shader object reference
    GLuint id;
 
    // Checks for shader compilation and linking errors
