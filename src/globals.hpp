@@ -6,7 +6,7 @@
 #define WIN_H 1080
 
 // Vertical sync
-#define VSYNC true
+#define VSYNC 1
 
 // Anti-aliasing multiplier
 #define AA_X 16

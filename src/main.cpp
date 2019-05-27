@@ -24,7 +24,8 @@ GLFWwindow* makeWindow()
       glEnable(GL_MULTISAMPLE);
    }
 
-#ifdef __APPLE__ // Fixes compilation on OS X
+#ifdef __APPLE__
+   // Fixes compilation on OS X
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
@@ -64,7 +65,7 @@ int main()
       return 1;
    }
 
-   Shader shader("persp.vert", "persp.frag");
+   Shader shader("persp");
    glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
 
    size_t frames = 0;
@@ -81,7 +82,7 @@ int main()
       elapsed = (newTime = glfwGetTime()) - time;
       frames++;
 
-      // This code is executed as close to once per second as possible (I think)
+      // Runs every 1 second on average
       if (elapsed > 1 - elapsed / frames / 2)
       {
          std::cout << "T = "   << 1000.0 * elapsed / frames << " ms\t"

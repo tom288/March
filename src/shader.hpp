@@ -11,8 +11,11 @@
 class Shader
 { public:
 
+   // Assumes both files have the same names with the expected extensions
+   Shader(const std::string path) : Shader(path + ".vert", path + ".frag") { }
+
    // Constructor compiles and links shader source
-   Shader(const char* vertPath, const char* fragPath)
+   Shader(std::string vertPath, std::string fragPath)
    {
       const std::string FOLDER = "src/glsl/";
 
@@ -22,15 +25,15 @@ class Shader
       std::ifstream fShaderFile;
 
       // Ensure ifstream objects can throw exceptions
-      vShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
-      fShaderFile.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+      vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+      fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
       try
       {
          // Open files
+         std::stringstream vShaderStream, fShaderStream;
          vShaderFile.open(FOLDER + vertPath);
          fShaderFile.open(FOLDER + fragPath);
-         std::stringstream vShaderStream, fShaderStream;
 
          // Read buffer contents into streams
          vShaderStream << vShaderFile.rdbuf();
@@ -52,16 +55,15 @@ class Shader
 
       const char* vShaderCode = vertCode.c_str();
       const char* fShaderCode = fragCode.c_str();
-      unsigned int vert, frag;
 
       // Compile vertex shader
-      vert = glCreateShader(GL_VERTEX_SHADER);
+      GLuint vert = glCreateShader(GL_VERTEX_SHADER);
       glShaderSource(vert, 1, &vShaderCode, NULL);
       glCompileShader(vert);
       checkCompileErrors(vert, "VERTEX");
 
       // Compile fragment Shader
-      frag = glCreateShader(GL_FRAGMENT_SHADER);
+      GLuint frag = glCreateShader(GL_FRAGMENT_SHADER);
       glShaderSource(frag, 1, &fShaderCode, NULL);
       glCompileShader(frag);
       checkCompileErrors(frag, "FRAGMENT");
@@ -133,19 +135,19 @@ class Shader
    void setMat2(const std::string &name, const glm::mat2 &mat) const
    {
       glUniformMatrix2fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE
-                                                                  , &mat[0][0]);
+                                                               , &mat[0][0]);
    }
 
    void setMat3(const std::string &name, const glm::mat3 &mat) const
    {
       glUniformMatrix3fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE
-                                                                  , &mat[0][0]);
+                                                               , &mat[0][0]);
    }
 
    void setMat4(const std::string &name, const glm::mat4 &mat) const
    {
       glUniformMatrix4fv(glGetUniformLocation(id, name.c_str()), 1, GL_FALSE
-                                                                  , &mat[0][0]);
+                                                               , &mat[0][0]);
    }
 
 private:
@@ -158,23 +160,23 @@ private:
       GLint ok;
       GLchar log[1024];
 
-      if (type != "PROGRAM")
-      {
-         glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
-         if (!ok)
-         {
-            glGetShaderInfoLog(shader, 1024, NULL, log);
-            std::cout << "ERROR: Shader compilation error with shader type "
-               << type << "\n" << log << std::endl;
-         }
-      }
-      else
+      if (type == "PROGRAM")
       {
          glGetProgramiv(shader, GL_LINK_STATUS, &ok);
          if (!ok)
          {
             glGetProgramInfoLog(shader, 1024, NULL, log);
-            std::cout << "ERROR: Shader linking error with type "
+            std::cout << "ERROR: Shader program linking error"
+               << "\n" << log << std::endl;
+         }
+      }
+      else
+      {
+         glGetShaderiv(shader, GL_COMPILE_STATUS, &ok);
+         if (!ok)
+         {
+            glGetShaderInfoLog(shader, 1024, NULL, log);
+            std::cout << "ERROR: Compilation error for shader type "
                << type << "\n" << log << std::endl;
          }
       }
