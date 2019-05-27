@@ -20,6 +20,7 @@
 ## Code style
 1. Use 3 space indentation
 2. `if (...) {` on one line is bad
-3. Comments begin & end with spaces
+3. `if(` with no space is even worse
+4. Comments begin & end with spaces
 5. `SCREAMING_SNAKE_CASE` constants
 6. `PascalCase` classes, `camelCase` others
