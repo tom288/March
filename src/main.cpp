@@ -40,7 +40,6 @@ void scrollCallback(GLFWwindow* win, double xoffset, double yoffset)
    // TODO
 }
 
-
 // Creates and returns a window
 GLFWwindow* makeWindow()
 {

@@ -65,7 +65,7 @@ class Camera
 
          if (glm::length(velocity) > MAXSPD)
          {
-            velocity = glm::normalize(velocity) * GLdouble(MAXSPD);
+            velocity = glm::normalize(velocity) * MAXSPD;
          }
       }
       else
