@@ -5,6 +5,41 @@
 #include <iostream>
 #include "globals.hpp"
 #include "shader.hpp"
+#include "camera.hpp"
+
+// The current camera
+Camera* cam;
+
+// Keyboard input callback
+void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
+{
+   if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(win, GL_TRUE);
+	}
+}
+
+// Mouse cursor movement callback
+double xold, yold;
+void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
+{
+   if (cam) cam->moveMouse(xpos - xold, yold - xpos);
+   xold = xpos;
+   yold = ypos;
+}
+
+// TODO
+void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
+{
+   // TODO
+}
+
+// TODO
+void scrollCallback(GLFWwindow* win, double xoffset, double yoffset)
+{
+   // TODO
+}
+
 
 // Creates and returns a window
 GLFWwindow* makeWindow()
@@ -17,12 +52,16 @@ GLFWwindow* makeWindow()
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-   if (AA_X != 1)
+   if (AA_X > 1)
    {
       // Enable antialiasing
       glfwWindowHint(GLFW_SAMPLES, AA_X);
       glEnable(GL_MULTISAMPLE);
    }
+
+   // Ignore hidden triangles
+   glEnable(GL_CULL_FACE);
+   glEnable(GL_DEPTH_TEST);
 
 #ifdef __APPLE__
    // Fixes compilation on OS X
@@ -32,6 +71,10 @@ GLFWwindow* makeWindow()
    window = glfwCreateWindow(WIN_W, WIN_H, ":D", nullptr, nullptr);
    glfwMakeContextCurrent(window);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+   glfwSetKeyCallback(window, keyCallback);
+   glfwSetMouseButtonCallback(window, mouseButtonCallback);
+   glfwSetCursorPosCallback(window, cursorPosCallback);
+   glfwSetScrollCallback(window, scrollCallback);
 
    if (!VSYNC)
    {
@@ -41,16 +84,9 @@ GLFWwindow* makeWindow()
 
    if (RAW_INPUT && glfwRawMouseMotionSupported())
    {
-      // Disable mouse accel
+      // Disable mouse acceleration
       glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-      std::cout << "Raw input is enabled!" << std::endl;
    }
-   // TODO read input
-   // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-   // glfwSetKeyCallback(window, keyCB);
-   // glfwSetMouseButtonCallback(window, mouseButtonCB);
-   // glfwSetCursorPosCallback(window, mouseCursorCB);
-   // glfwSetScrollCallback(window, scrollCB);
 
    glewExperimental = GL_TRUE;
    glewInit();
@@ -74,29 +110,29 @@ int main()
 
    Shader shader("persp");
    glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
+   glfwGetCursorPos(window, &xold, &yold);
 
    size_t frames = 0;
    double elapsed, newTime, time = glfwGetTime();
 
    while (!glfwWindowShouldClose(window))
    {
-      glfwPollEvents();
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      shader.use();
-      glfwSwapBuffers(window);
-
       elapsed = (newTime = glfwGetTime()) - time;
-      frames++;
 
       // Runs every 1 second on average
-      if (elapsed > 1 - elapsed / frames / 2)
+      if (elapsed > 1 - elapsed / ++frames / 2)
       {
          std::cout << "T = "   << 1000.0 * elapsed / frames << " ms\t"
                    << "FPS = " << frames / elapsed << std::endl;
          time = newTime;
          frames = 0;
       }
+
+      glfwPollEvents();
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      shader.use();
+      glfwSwapBuffers(window);
    }
 
    glfwTerminate();
