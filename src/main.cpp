@@ -8,7 +8,7 @@
 #include "camera.hpp"
 
 // The current camera
-Camera* cam;
+Camera* cam = nullptr;
 
 // Keyboard input callback
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
@@ -28,13 +28,13 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
    yold = ypos;
 }
 
-// TODO
+// Mouse button input callback
 void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
 {
    // TODO
 }
 
-// TODO
+// Mouse scroll wheel movement callback
 void scrollCallback(GLFWwindow* win, double xoffset, double yoffset)
 {
    // TODO
@@ -108,7 +108,9 @@ int main()
       return 1;
    }
 
+   cam = new Camera();
    Shader shader("persp");
+
    glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
 
@@ -122,7 +124,7 @@ int main()
       // Runs every 1 second on average
       if (elapsed > 1 - elapsed / ++frames / 2)
       {
-         std::cout << "T = "   << 1000.0 * elapsed / frames << " ms\t"
+         std::cout <<   "T = " << 1000.0 * elapsed / frames << " ms\t"
                    << "FPS = " << frames / elapsed << std::endl;
          time = newTime;
          frames = 0;
@@ -136,5 +138,6 @@ int main()
    }
 
    glfwTerminate();
+   delete cam;
    return 0;
 }

@@ -2,6 +2,8 @@
 #define CAMERA_H_
 
 #include <glm/glm.hpp>
+
+// Used for lookAt and perspective
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera
@@ -10,45 +12,57 @@ class Camera
    // TODO comment
    Camera()
    {
-      // TODO Initialise members
-      pitch = yaw = 0.0;
-      fov = 106.26;
+      position = velocity = glm::dvec3(0.0, 0.0, 0.0);
       sens = 0.1;
-      calcVectors();
-      calcProjection();
+
+      setAngle(0.0, 0.0);
+      setFOV(106.26);
    }
 
-   // TODO comment
+   // Uses mouse input to reorient the camera
    void moveMouse(double dx, double dy)
    {
-      double PITCH_MAX = 89.0;
+      setAngle(yaw + dx * sens, pitch + dy * sens);
+   }
 
-      yaw   += dx * sens;
-      pitch += dy * sens;
-
-      while (yaw < -180) yaw += 360;
-      while (yaw >= 180) yaw -= 360;
-
-      pitch = glm::clamp(pitch, -PITCH_MAX, PITCH_MAX);
+   // Changes the camera angle and recalculates the view matrix + vectors
+   void setAngle(double yaw, double pitch)
+   {
+      this->yaw = glm::mod(yaw + 180.0, 360.0) - 180.0;
+      this->pitch = glm::clamp(pitch, -PITCH_MAX, PITCH_MAX);
 
       calcVectors();
    }
 
-   // TODO comment
+   // Changes the FOV and recalculates the projection matrix
    void setFOV(double fov)
    {
-      double FOV_MIN = 10, FOV_MAX = 170;
+      this->fov = glm::clamp(fov, FOV_MIN, FOV_MAX);
 
-      fov = glm::clamp(fov, FOV_MIN, FOV_MAX);
       calcProjection();
    }
 
-   // TODO getter(s) for P, V or P * V
+   // Returns the product of the projection and view matrices TODO rename?
+   glm::mat4 getPxV()
+   {
+      return projection * view;
+   }
 
-   // TODO step
+   // TODO
+   void step()
+   {
+      // TODO
+   }
 
 private:
-   // TODO
+
+   const glm::dvec3 UP = glm::dvec3(0.0, 1.0, 0.0);
+   const double PITCH_MAX = 89.0;
+   const double FOV_MIN = 10;
+   const double FOV_MAX = 170;
+   const double NEAR = 0.1;
+   const double FAR = 1000.0;
+
    glm::dvec3 position;
    glm::dvec3 velocity;
 
@@ -60,32 +74,38 @@ private:
 
    // Populated by calcVectors
    glm::dvec3 look;
-   glm::dvec3 up;
    glm::dvec3 right;
    glm::dvec3 front;
 
-   // TODO comment
+   // Populated by calcView
+   glm::mat4 view;
+
+   // Populated by calcProjection
+   glm::mat4 projection;
+
+   // Calculates the look, right and front vectors
    void calcVectors()
    {
       double y = glm::radians(yaw), p = glm::radians(pitch), c = cos(p);
-      look = glm::normalize(glm::dvec3(cos(y) * c, sin(p), sin(y) * c));
-      up = glm::dvec3(0.0f, 1.0f, 0.0f);
-      right = glm::normalize(glm::cross(up, look));
-      front = glm::normalize(glm::cross(up, right));
+      look  = glm::normalize(glm::dvec3(cos(y) * c, sin(p), sin(y) * c));
+      right = glm::normalize(glm::cross(UP, look));
+      front = glm::normalize(glm::cross(UP, right));
+
+      calcView();
    }
 
-   // Populated by calcProjection
-   glm::dmat4 projection;
+   // Calculates the new view matrix
+   void calcView()
+   {
+      view = glm::lookAt(position, position + look, UP);
+   }
 
-   // TODO comment
+   // Calculates the new projection matrix
    void calcProjection()
    {
-      const double NEAR = 0.1f, FAR = 1000.0f;
-      
       double rad = glm::radians(fov);
       projection = glm::perspective(rad, double(WIN_W) / WIN_H, NEAR, FAR);
    }
-
 };
 
 #endif
