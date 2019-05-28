@@ -51,8 +51,11 @@ class Camera
    // Moves the camera according to velocity, input and time since last step
    void step(glm::dvec3 input, double time)
    {
-      glm::dvec3 acceleration = input;
       glm::dvec3 vel(velocity);
+      glm::dvec3 acceleration(0.0, 0.0, 0.0);
+      acceleration += input.x * right;
+      acceleration += input.y * UP;
+      acceleration += input.z * look;
 
       if (glm::length(acceleration) > 0.0)
       {

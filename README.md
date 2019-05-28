@@ -2,7 +2,7 @@
 
 ## How to install on windows
 1. Clone repo to local directory
-2. Install MinGW [(I think I got it from here)](https://sourceforge.net/projects/mingw-w64/)
+2. [Install MinGW](https://sourceforge.net/projects/mingw-w64/)
 3. Install libs
    1. [Find the latest GLM release](https://github.com/g-truc/glm/tags)
       and put `glm-*version#*.zip/glm` in `/lib` as `/lib/glm`

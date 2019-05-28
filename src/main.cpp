@@ -131,8 +131,12 @@ int main()
 
       glfwPollEvents();
 
-      // TODO Calculate input vector
-      cam->step(glm::dvec3(0.0, 0.0, 0.0), elapsed);
+      glm::dvec3 input(0.0, 0.0, 0.0);
+      input.x = glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A);
+      input.y = glfwGetKey(window, GLFW_KEY_SPACE)
+              - glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
+      input.z = glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S);
+      cam->step(input, elapsed);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
