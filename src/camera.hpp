@@ -9,7 +9,7 @@
 class Camera
 { public:
 
-   // TODO comment
+   // Initialises members
    Camera()
    {
       position = velocity = glm::dvec3(0.0, 0.0, 0.0);
@@ -48,21 +48,48 @@ class Camera
       return projection * view;
    }
 
-   // TODO
-   void step()
+   // Moves the camera according to velocity, input and time since last step
+   void step(glm::dvec3 input, double time)
    {
-      // TODO
+      glm::dvec3 acceleration = input;
+      glm::dvec3 vel(velocity);
+
+		if (glm::length(acceleration) > 0.0)
+		{
+			if (glm::length(acceleration) > 1.0)
+			{
+				acceleration = glm::normalize(acceleration);
+			}
+
+			velocity += acceleration * time * ACC;
+
+			if (glm::length(velocity) > MAXSPD)
+			{
+				velocity = glm::normalize(velocity) * GLdouble(MAXSPD);
+			}
+		}
+		else
+		{
+			velocity *= pow(FRICTION, time);
+		}
+
+		position += (vel + velocity) * time * 0.5;
    }
 
 private:
 
+   // Constants
    const glm::dvec3 UP = glm::dvec3(0.0, 1.0, 0.0);
    const double PITCH_MAX = 89.0;
    const double FOV_MIN = 10;
    const double FOV_MAX = 170;
    const double NEAR = 0.1;
    const double FAR = 1000.0;
+   const double ACC = 500.0;
+   const double MAXSPD = 50.0;
+   const double FRICTION = 0.0001;
 
+   // Kinematics
    glm::dvec3 position;
    glm::dvec3 velocity;
 
