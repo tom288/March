@@ -14,9 +14,9 @@ Camera* cam = nullptr;
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
-		glfwSetWindowShouldClose(win, GL_TRUE);
-	}
+   {
+      glfwSetWindowShouldClose(win, GL_TRUE);
+   }
 }
 
 // Mouse cursor movement callback
@@ -131,7 +131,7 @@ int main()
       }
 
       glfwPollEvents();
-      
+
       // TODO Calculate input vector
       cam->step(glm::dvec3(0.0, 0.0, 0.0), elapsed);
 

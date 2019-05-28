@@ -54,26 +54,26 @@ class Camera
       glm::dvec3 acceleration = input;
       glm::dvec3 vel(velocity);
 
-		if (glm::length(acceleration) > 0.0)
-		{
-			if (glm::length(acceleration) > 1.0)
-			{
-				acceleration = glm::normalize(acceleration);
-			}
+      if (glm::length(acceleration) > 0.0)
+      {
+         if (glm::length(acceleration) > 1.0)
+         {
+            acceleration = glm::normalize(acceleration);
+         }
 
-			velocity += acceleration * time * ACC;
+         velocity += acceleration * time * ACC;
 
-			if (glm::length(velocity) > MAXSPD)
-			{
-				velocity = glm::normalize(velocity) * GLdouble(MAXSPD);
-			}
-		}
-		else
-		{
-			velocity *= pow(FRICTION, time);
-		}
+         if (glm::length(velocity) > MAXSPD)
+         {
+            velocity = glm::normalize(velocity) * GLdouble(MAXSPD);
+         }
+      }
+      else
+      {
+         velocity *= pow(FRICTION, time);
+      }
 
-		position += (vel + velocity) * time * 0.5;
+      position += (vel + velocity) * time * 0.5;
    }
 
 private:
