@@ -52,16 +52,8 @@ GLFWwindow* makeWindow()
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-   if (AA_X > 1)
-   {
-      // Enable antialiasing
-      glfwWindowHint(GLFW_SAMPLES, AA_X);
-      glEnable(GL_MULTISAMPLE);
-   }
-
-   // Ignore hidden triangles
-   glEnable(GL_CULL_FACE);
-   glEnable(GL_DEPTH_TEST);
+   // Enable antialiasing
+   if (AA_X > 1) glfwWindowHint(GLFW_SAMPLES, AA_X);
 
 #ifdef __APPLE__
    // Fixes compilation on OS X
@@ -76,11 +68,15 @@ GLFWwindow* makeWindow()
    glfwSetCursorPosCallback(window, cursorPosCallback);
    glfwSetScrollCallback(window, scrollCallback);
 
-   if (!VSYNC)
-   {
-      // Disable vertical sync
-      glfwSwapInterval(0);
-   }
+   // Ignore hidden triangles
+   glEnable(GL_CULL_FACE);
+   glEnable(GL_DEPTH_TEST);
+
+   // Configure vertical sync
+   if (!VSYNC) glfwSwapInterval(0);
+
+   // Configure antialiasing
+   if (AA_X > 1) glEnable(GL_MULTISAMPLE);
 
    if (RAW_INPUT && glfwRawMouseMotionSupported())
    {
@@ -116,34 +112,33 @@ int main()
    glfwGetCursorPos(window, &xold, &yold);
 
    size_t frames = 0;
-   double elapsed, time, deltaTime, newTime, oldTime;
-   oldTime = newTime = glfwGetTime();
+   double deltaTime, oldTime = glfwGetTime(), elapsed = 0;
 
    while (!glfwWindowShouldClose(window))
    {
-      time = glfwGetTime();
-      deltaTime = time - newTime;
-      newTime = time;
-
-      elapsed = newTime - oldTime;
+      deltaTime = glfwGetTime() - oldTime;
+      oldTime += deltaTime;
+      elapsed += deltaTime;
 
       // Runs every 1 second on average
       if (elapsed > 1 - elapsed / ++frames / 2)
       {
          std::cout <<   "T = " << 1000.0 * elapsed / frames << " ms\t"
                    << "FPS = " << frames / elapsed << std::endl;
-         oldTime = newTime;
+         elapsed = 0;
          frames = 0;
       }
 
       glfwPollEvents();
 
       glm::dvec3 input;
-      input.x = glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A);
+      input.x = glfwGetKey(window, GLFW_KEY_D)
+              - glfwGetKey(window, GLFW_KEY_A);
       input.y = glfwGetKey(window, GLFW_KEY_SPACE)
              - (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
              || glfwGetKey(window, GLFW_KEY_LEFT_CONTROL));
-      input.z = glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S);
+      input.z = glfwGetKey(window, GLFW_KEY_W)
+              - glfwGetKey(window, GLFW_KEY_S);
       cam->step(input, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
