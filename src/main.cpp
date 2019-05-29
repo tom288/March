@@ -6,6 +6,7 @@
 #include "globals.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+#include "chunk.hpp"
 
 // The current camera
 Camera* cam = nullptr;
@@ -23,7 +24,7 @@ void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 double xold, yold;
 void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
 {
-   if (cam) cam->moveMouse(xpos - xold, yold - xpos);
+   if (cam) cam->moveMouse(xpos - xold, yold - ypos);
    xold = xpos;
    yold = ypos;
 }
@@ -109,39 +110,47 @@ int main()
 
    cam = new Camera();
    Shader shader("persp");
+   Chunk chunk;
 
    glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
 
    size_t frames = 0;
-   double elapsed, newTime, time = glfwGetTime();
+   double time, deltaTime, newTime, oldTime;
+   oldTime = newTime = glfwGetTime();
 
    while (!glfwWindowShouldClose(window))
    {
-      elapsed = (newTime = glfwGetTime()) - time;
+      time = glfwGetTime();
+      deltaTime = time - newTime;
+      newTime = time;
 
       // Runs every 1 second on average
-      if (elapsed > 1 - elapsed / ++frames / 2)
+      if (newTime - oldTime > 1 - (newTime - oldTime) / ++frames / 2)
       {
-         std::cout <<   "T = " << 1000.0 * elapsed / frames << " ms\t"
-                   << "FPS = " << frames / elapsed << std::endl;
-         time = newTime;
+         std::cout <<   "T = " << 1000.0 * newTime - oldTime / frames << " ms\t"
+                   << "FPS = " << frames / newTime - oldTime << std::endl;
+         oldTime = newTime;
          frames = 0;
       }
 
       glfwPollEvents();
 
-      glm::dvec3 input(0.0, 0.0, 0.0);
+      glm::dvec3 input;
       input.x = glfwGetKey(window, GLFW_KEY_D) - glfwGetKey(window, GLFW_KEY_A);
       input.y = glfwGetKey(window, GLFW_KEY_SPACE)
-              - glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
+             - (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
+             || glfwGetKey(window, GLFW_KEY_LEFT_CONTROL));
       input.z = glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_S);
-      cam->step(input, elapsed);
+      cam->step(input, deltaTime);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       shader.use();
-      // TODO draw
+      shader.setMat4("model", chunk.getModel());
+      shader.setMat4("view", cam->getView());
+      shader.setMat4("projection", cam->getProjection());
+      chunk.draw();
 
       glfwSwapBuffers(window);
    }

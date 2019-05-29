@@ -152,7 +152,7 @@ private:
    GLuint id;
 
    // Checks for shader compilation and linking errors
-   void checkCompileErrors(GLuint shader, std::string type)
+   void checkCompileErrors(GLuint shader, std::string type) const
    {
       GLint ok;
       GLchar log[1024];
@@ -163,8 +163,7 @@ private:
          if (!ok)
          {
             glGetProgramInfoLog(shader, 1024, NULL, log);
-            std::cout << "ERROR: Shader program linking error"
-               << "\n" << log << std::endl;
+            std::cout << "ERROR: Shader program linking error";
          }
       }
       else
@@ -173,10 +172,11 @@ private:
          if (!ok)
          {
             glGetShaderInfoLog(shader, 1024, NULL, log);
-            std::cout << "ERROR: Compilation error for shader type "
-               << type << "\n" << log << std::endl;
+            std::cout << "ERROR: Compilation error for shader type " << type;
          }
       }
+      
+      if (!ok) std::cout << "\n" << log << std::endl;
    }
 };
 

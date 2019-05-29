@@ -16,7 +16,7 @@ class Camera
       sens = 0.1;
 
       setAngle(0.0, 0.0);
-      setFOV(106.26);
+      setFOV(90);
    }
 
    // Uses mouse input to reorient the camera
@@ -42,10 +42,16 @@ class Camera
       calcProjection();
    }
 
-   // Returns the product of the projection and view matrices TODO rename?
-   glm::mat4 getPxV()
+   // Returns the view matrix
+   glm::mat4 getView() const
    {
-      return projection * view;
+      return view;
+   }
+
+   // Returns the projection matrix
+   glm::mat4 getProjection() const
+   {
+      return projection;
    }
 
    // Moves the camera according to velocity, input and time since last step
@@ -77,6 +83,8 @@ class Camera
       }
 
       position += (vel + velocity) * time * 0.5;
+
+      calcView();
    }
 
 private:
@@ -118,7 +126,7 @@ private:
    {
       double y = glm::radians(yaw), p = glm::radians(pitch), c = cos(p);
       look  = glm::normalize(glm::dvec3(cos(y) * c, sin(p), sin(y) * c));
-      right = glm::normalize(glm::cross(UP, look));
+      right = glm::normalize(glm::cross(look, UP));
       front = glm::normalize(glm::cross(UP, right));
 
       calcView();
