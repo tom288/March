@@ -112,11 +112,11 @@ int main()
    Shader shader("persp");
    Chunk chunk;
 
-   glClearColor(0.2f, 0.4f, 1.0f, 1.0f);
+   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
 
    size_t frames = 0;
-   double time, deltaTime, newTime, oldTime;
+   double elapsed, time, deltaTime, newTime, oldTime;
    oldTime = newTime = glfwGetTime();
 
    while (!glfwWindowShouldClose(window))
@@ -125,11 +125,13 @@ int main()
       deltaTime = time - newTime;
       newTime = time;
 
+      elapsed = newTime - oldTime;
+
       // Runs every 1 second on average
-      if (newTime - oldTime > 1 - (newTime - oldTime) / ++frames / 2)
+      if (elapsed > 1 - elapsed / ++frames / 2)
       {
-         std::cout <<   "T = " << 1000.0 * newTime - oldTime / frames << " ms\t"
-                   << "FPS = " << frames / newTime - oldTime << std::endl;
+         std::cout <<   "T = " << 1000.0 * elapsed / frames << " ms\t"
+                   << "FPS = " << frames / elapsed << std::endl;
          oldTime = newTime;
          frames = 0;
       }

@@ -77,11 +77,8 @@ class Camera
             velocity = glm::normalize(velocity) * MAXSPD;
          }
       }
-      else
-      {
-         velocity *= pow(FRICTION, time);
-      }
 
+      velocity *= pow(FRICTION, time * (1 - glm::length(acceleration)));
       position += (vel + velocity) * time * 0.5;
 
       calcView();
@@ -96,7 +93,7 @@ private:
    const double FOV_MAX = 170;
    const double NEAR = 0.1;
    const double FAR = 1000.0;
-   const double ACC = 500.0;
+   const double ACC = 300.0;
    const double MAXSPD = 50.0;
    const double FRICTION = 0.0001;
 
