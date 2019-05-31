@@ -52,7 +52,7 @@ GLFWwindow* makeWindow()
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-   // Enable antialiasing
+   // Configure antialiasing
    if (AA_X > 1) glfwWindowHint(GLFW_SAMPLES, AA_X);
 
 #ifdef __APPLE__

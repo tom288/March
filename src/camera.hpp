@@ -2,8 +2,6 @@
 #define CAMERA_H_
 
 #include <glm/glm.hpp>
-
-// Used for lookAt and perspective
 #include <glm/gtc/matrix_transform.hpp>
 
 class Camera
