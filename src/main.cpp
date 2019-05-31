@@ -6,6 +6,7 @@
 #include "globals.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
+#include "chunk.hpp"
 #include "cube.hpp"
 
 // The current camera
@@ -69,7 +70,7 @@ GLFWwindow* makeWindow()
    glfwSetScrollCallback(window, scrollCallback);
 
    // Ignore hidden triangles
-   glEnable(GL_CULL_FACE);
+   // glEnable(GL_CULL_FACE); // TODO ENABLE
    glEnable(GL_DEPTH_TEST);
 
    // Configure vertical sync
@@ -106,7 +107,7 @@ int main()
 
    cam = new Camera();
    Shader shader("persp");
-   Cube cube;
+   Chunk chunk;
 
    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
@@ -142,10 +143,10 @@ int main()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       shader.use();
-      shader.setMat4("model", cube.getModel());
+      shader.setMat4("model", chunk.getModel());
       shader.setMat4("view", cam->getView());
       shader.setMat4("projection", cam->getProjection());
-      cube.draw();
+      chunk.draw();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
