@@ -6,7 +6,7 @@
 #include "globals.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
-#include "chunk.hpp"
+#include "cube.hpp"
 
 // The current camera
 Camera* cam = nullptr;
@@ -106,7 +106,7 @@ int main()
 
    cam = new Camera();
    Shader shader("persp");
-   Chunk chunk;
+   Cube cube;
 
    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
@@ -129,8 +129,6 @@ int main()
          frames = 0;
       }
 
-      glfwPollEvents();
-
       glm::dvec3 input;
       input.x = glfwGetKey(window, GLFW_KEY_D)
               - glfwGetKey(window, GLFW_KEY_A);
@@ -144,12 +142,13 @@ int main()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       shader.use();
-      shader.setMat4("model", chunk.getModel());
+      shader.setMat4("model", cube.getModel());
       shader.setMat4("view", cam->getView());
       shader.setMat4("projection", cam->getProjection());
-      chunk.draw();
+      cube.draw();
 
       glfwSwapBuffers(window);
+      glfwPollEvents();
    }
 
    glfwTerminate();

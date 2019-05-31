@@ -1,10 +1,10 @@
-#ifndef CHUNK_H_
-#define CHUNK_H_
+#ifndef CUBE_H_
+#define CUBE_H_
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-GLfloat v[36 * 6] = {
+static const GLfloat v[36 * 6] = {
    -1.0f, -1.0f, -1.0f,    0.583f,  0.771f,  0.014f,
    -1.0f, -1.0f,  1.0f,    0.609f,  0.115f,  0.436f,
    -1.0f,  1.0f,  1.0f,    0.327f,  0.483f,  0.844f,
@@ -43,10 +43,11 @@ GLfloat v[36 * 6] = {
     1.0f, -1.0f,  1.0f,    0.982f,  0.099f,  0.879f
 };
 
-class Chunk
+class Cube
 { public:
 
-   Chunk()
+   // TODO
+   Cube()
    {
       model = glm::mat4(1.0f);
 
@@ -65,17 +66,20 @@ class Chunk
       glBindVertexArray(0);
    }
 
-   ~Chunk()
+   // TODO
+   ~Cube()
    {
       glDeleteVertexArrays(1, &VAO);
       glDeleteBuffers(1, &VBO);
    }
 
+   // TODO
    glm::mat4 getModel() const
    {
       return model;
    }
 
+   // TODO
    void draw() const
    {
       glBindVertexArray(VAO);
@@ -85,7 +89,10 @@ class Chunk
 
 private:
 
+   // TODO
    GLuint VBO, VAO;
+
+   // TODO
    glm::mat4 model;
 };
 
