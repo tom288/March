@@ -325,20 +325,6 @@ class Chunk
          }
       }
 
-      /* std::cout << std::endl;
-      for (size_t i = 0; i < verts.size() / 18; i++)
-      {
-         for (size_t j = 0; j < 3; j++)
-         {
-            for (size_t k = 0; k < 6; k++)
-            {
-               std::cout << verts[(i * 3 + j) * 6 + k] << " ";
-            }
-            std::cout << std::endl;
-         }
-         std::cout << std::endl;
-      } */
-
       glGenVertexArrays(1, &VAO);
       glGenBuffers(1, &VBO);
       glBindVertexArray(VAO);
@@ -398,7 +384,6 @@ private:
       for (int i = 0; i < 8; i++)
       {
          grid[i] = pos;
-
          for (int j = 0; j < 3; j++) grid[i][j] += (i >> j) & 1;
       }
 
@@ -418,7 +403,7 @@ private:
       {
          if (edges[cubeindex] & (1 << i))
          {
-            vertlist[i] = verterp(isolevel, grid[i % 8], grid[t[i]]);
+            vertlist[i] = verterp2(isolevel, grid[i % 8], grid[t[i]]);
          }
       }
 
@@ -431,7 +416,7 @@ private:
             verts.push_back(vertlist[tris[cubeindex][i]][d]);
          }
 
-         // Vertex colour data TODO use proper values
+         // Vertex colour data TODO use proper values instead of prime hashes
          verts.push_back((verts.size() / 18 * 86969 % 76963) / 76962.0f);
          verts.push_back((verts.size() / 18 * 83663 % 78623) / 78623.0f);
          verts.push_back((verts.size() / 18 * 84653 % 73387) / 73387.0f);
@@ -439,26 +424,42 @@ private:
    }
 
    // Lerps for edge intersections
-   glm::vec3 verterp(double isolevel, glm::vec3 p1, glm::vec3 p2) const
+   glm::vec3 verterp(double isolevel, glm::vec3 a, glm::vec3 b) const
    {
-      if (glm::abs(isolevel   - sample(p1)) < 0.00001) return p1;
-      if (glm::abs(isolevel   - sample(p2)) < 0.00001) return p2;
-      if (glm::abs(sample(p1) - sample(p2)) < 0.00001) return p1;
+      if (glm::abs(isolevel  - sample(a)) < 0.00001) return a;
+      if (glm::abs(isolevel  - sample(b)) < 0.00001) return b;
+      if (glm::abs(sample(a) - sample(b)) < 0.00001) return a;
 
-      double mu = (isolevel - sample(p1)) / (sample(p2) - sample(p1));
-      glm::vec3 p;
-      p.x = p1.x + mu * (p2.x - p1.x);
-      p.y = p1.y + mu * (p2.y - p1.y);
-      p.z = p1.z + mu * (p2.z - p1.z);
+      double mu = (isolevel - sample(a)) / (sample(b) - sample(a));
 
-      return p;
+      glm::vec3 r;
+      for (int d = 0; d < 3; d++) r[d] = a[d] + mu * (b[d] - a[d]);
+      return r;
    }
 
    // TODO
-   double sample(glm::vec3 p) const
+   glm::vec3 verterp2(double isolevel, glm::vec3 a, glm::vec3 b) const
    {
-      const float SCALE = 32;
-      return open_simplex_noise3(ctx, p.x / SCALE, p.y / SCALE, p.z / SCALE);
+      if (less(b, a)) std::swap(a, b);
+      float s = sample(b) - sample(a);
+
+      glm::vec3 r = a;
+      if (glm::abs(s) > 1e-5) r += (b - a) / s * float(isolevel - sample(a));
+      return r;
+   }
+
+   // TODO
+   bool less(glm::vec3 a, glm::vec3 b) const
+   {
+      for (int d = 0; d < 3; d++) if (a[d] != b[d]) return a[d] < b[d];
+      return false;
+   }
+
+   // TODO
+   double sample(glm::vec3 v) const
+   {
+      const float SCALE = 16;
+      return open_simplex_noise3(ctx, v.x / SCALE, v.y / SCALE, v.z / SCALE);
    }
 };
 

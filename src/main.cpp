@@ -71,6 +71,7 @@ GLFWwindow* makeWindow()
 
    // Ignore hidden triangles
    // glEnable(GL_CULL_FACE); // TODO ENABLE
+   std::cout << "WARNING - FACE CULLING DISABED" << std::endl;
    glEnable(GL_DEPTH_TEST);
 
    // Configure vertical sync
