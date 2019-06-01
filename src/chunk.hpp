@@ -6,6 +6,7 @@
 #include <vector>
 #include "osn.h"
 
+// TODO
 static const int edges[256] = {
    0x000,  0x109,  0x203,  0x30a,  0x406,  0x50f,  0x605,  0x70c,
    0x80c,  0x905,  0xa0f,  0xb06,  0xc0a,  0xd03,  0xe09,  0xf00,
@@ -41,6 +42,7 @@ static const int edges[256] = {
    0x70c,  0x605,  0x50f,  0x406,  0x30a,  0x203,  0x109,  0x000
 };
 
+// TODO
 static const int tris[256][16] = {
    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
    {  0,  8,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -306,35 +308,31 @@ class Chunk
    // TODO
    Chunk()
    {
+      model = glm::mat4(1.0f);
+
+      // TODO
       int64_t seed = 0;
       ctx = nullptr;
       open_simplex_noise(seed, &ctx);
 
-      model = glm::mat4(1.0f);
+      const int SIZE = 128;
 
-      int SIZE = 128;
-
-      for (int x = -SIZE / 2; x < SIZE / 2; x++)
-      {
-         for (int y = -SIZE / 2; y < SIZE / 2; y++)
-         {
+      for       (int x = -SIZE / 2; x < SIZE / 2; x++)
+         for    (int y = -SIZE / 2; y < SIZE / 2; y++)
             for (int z = -SIZE / 2; z < SIZE / 2; z++)
-            {
                polygonise(glm::vec3(x, y, z), 0);
-            }
-         }
-      }
 
+      // TODO
+      size_t s = sizeof(verts[0]);
       glGenVertexArrays(1, &VAO);
       glGenBuffers(1, &VBO);
       glBindVertexArray(VAO);
       glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(GLfloat), verts.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-                                            (GLvoid*)0);
+      glBufferData(GL_ARRAY_BUFFER, verts.size() * s,
+                                    verts.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * s, (GLvoid*)0);
       glEnableVertexAttribArray(0);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-                                            (GLvoid*)(3 * sizeof(GLfloat)));
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * s, (GLvoid*)(3 * s));
       glEnableVertexAttribArray(1);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
@@ -378,42 +376,42 @@ private:
    // Generates the mesh for position pos
    void polygonise(glm::vec3 pos, double isolevel)
    {
-      glm::vec3 vertlist[12];
-
+      // Populate the grid array
       glm::vec3 grid[8];
-      for (int i = 0; i < 8; i++)
+      for (int g = 0; g < 8; g++)
       {
-         grid[i] = pos;
-         for (int j = 0; j < 3; j++) grid[i][j] += (i >> j) & 1;
+         grid[g] = pos;
+         for (int d = 0; d < 3; d++) grid[g][d] += (g >> d) & 1;
       }
 
       // Determine the configuration index
       int cubeindex = 0;
-      for (int i = 0; i < 8; i++)
+      for (int g = 0; g < 8; g++)
       {
-         if (sample(grid[i]) < isolevel) cubeindex |= 1 << i;
+         if (sample(grid[g]) < isolevel) cubeindex |= 1 << g;
       }
 
       // Return if the volume contains 0 triangles
       if (!edges[cubeindex]) return;
 
       // List the vertices
-      int t[12] = { 1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7 };
-      for (int i = 0; i < 12; i++)
+      glm::vec3 vertlist[12];
+      int other[12] = { 1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7 };
+      for (int e = 0; e < 12; e++)
       {
-         if (edges[cubeindex] & (1 << i))
+         if (edges[cubeindex] & (1 << e))
          {
-            vertlist[i] = verterp2(isolevel, grid[i % 8], grid[t[i]]);
+            vertlist[e] = verterp2(isolevel, grid[e % 8], grid[other[e]]);
          }
       }
 
       // Create the triangles
-      for (int i = 0; tris[cubeindex][i] != -1; i++)
+      for (int v = 0; tris[cubeindex][v] != -1; v++)
       {
          // Vertex position data
          for (int d = 0; d < 3; d++)
          {
-            verts.push_back(vertlist[tris[cubeindex][i]][d]);
+            verts.push_back(vertlist[tris[cubeindex][v]][d]);
          }
 
          // Vertex colour data TODO use proper values instead of prime hashes
@@ -430,9 +428,8 @@ private:
       if (glm::abs(isolevel  - sample(b)) < 0.00001) return b;
       if (glm::abs(sample(a) - sample(b)) < 0.00001) return a;
 
-      double mu = (isolevel - sample(a)) / (sample(b) - sample(a));
-
       glm::vec3 r;
+      double mu = (isolevel - sample(a)) / (sample(b) - sample(a));
       for (int d = 0; d < 3; d++) r[d] = a[d] + mu * (b[d] - a[d]);
       return r;
    }
@@ -440,7 +437,7 @@ private:
    // TODO
    glm::vec3 verterp2(double isolevel, glm::vec3 a, glm::vec3 b) const
    {
-      if (less(b, a)) std::swap(a, b);
+      if (less(b, a)) std::swap(b, a);
       float s = sample(b) - sample(a);
 
       glm::vec3 r = a;

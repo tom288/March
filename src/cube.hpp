@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// TODO
 static const GLfloat v[36 * 6] = {
    -1.0f, -1.0f, -1.0f,    0.583f,  0.771f,  0.014f,
    -1.0f, -1.0f,  1.0f,    0.609f,  0.115f,  0.436f,
@@ -51,6 +52,7 @@ class Cube
    {
       model = glm::mat4(1.0f);
 
+      // TODO
       glGenVertexArrays(1, &VAO);
       glGenBuffers(1, &VBO);
       glBindVertexArray(VAO);
