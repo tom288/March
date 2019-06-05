@@ -129,6 +129,8 @@ class Chunk
       glEnableVertexAttribArray(1);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
+
+      std::cout << verts.size() << " verts" << std::endl;
    }
 
    // TODO
@@ -189,7 +191,7 @@ private:
          {
             verts.push_back(verterp2(lvl, grid[t % 8], grid[OTHER[t]])[d]);
          }
-         
+
          // Vertex colour data
          verts.push_back(glm::abs(sample(pos * .5f + glm::vec3(9000, 0, 0))));
          verts.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 9000, 0))));

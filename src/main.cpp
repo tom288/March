@@ -42,7 +42,7 @@ void scrollCallback(GLFWwindow* win, double xoffset, double yoffset)
 }
 
 // Creates and returns a window
-GLFWwindow* makeWindow()
+GLFWwindow* makeWindow(const char* title)
 {
    GLFWwindow* window = nullptr;
    glfwInit();
@@ -60,9 +60,18 @@ GLFWwindow* makeWindow()
    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-   window = glfwCreateWindow(WIN_W, WIN_H, ":D", nullptr, nullptr);
+   if (FULLSCREEN)
+   {
+      GLFWmonitor* mon = glfwGetPrimaryMonitor();
+      const GLFWvidmode* mode = glfwGetVideoMode(mon);
+      window = glfwCreateWindow(mode->width, mode->height, title, mon, nullptr);
+   }
+   else window = glfwCreateWindow(WIN_W, WIN_H, title, nullptr, nullptr);
+
    glfwMakeContextCurrent(window);
    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+   // Register callbacks
    glfwSetKeyCallback(window, keyCallback);
    glfwSetMouseButtonCallback(window, mouseButtonCallback);
    glfwSetCursorPosCallback(window, cursorPosCallback);
@@ -97,7 +106,7 @@ GLFWwindow* makeWindow()
 // Launches the program
 int main()
 {
-   GLFWwindow* window = makeWindow();
+   GLFWwindow* window = makeWindow(":D");
    if (!window)
    {
       glfwTerminate();

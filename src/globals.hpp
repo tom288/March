@@ -1,7 +1,10 @@
 #ifndef GLOBALS_H_
 #define GLOBALS_H_
 
-// Window dimensions
+// Use the entire primary monitor
+#define FULLSCREEN 1
+
+// Windowed screen resolution
 #define WIN_W 1920
 #define WIN_H 1080
 
