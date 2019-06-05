@@ -6,7 +6,7 @@
 #include <vector>
 #include "osn.h"
 
-// TODO
+// The triangulation table for all possible configurations
 static const int tris[256][16] = {
    { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
    {  0,  8,  3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -342,15 +342,14 @@ private:
    {
       // Populate the grid array
       glm::vec3 grid[8];
-      for (int g = 0; g < 8; g++) // TODO check
+      for (int g = 0; g < 8; g++)
       {
-         grid[g] = pos;
-         for (int d = 0; d < 3; d++) grid[g][d] += g >> d & 1;
+         grid[g] = pos + glm::vec3((g + 1) % 4 / 2, g / 4, g % 4 / 2);
       }
 
       // Determine the configuration index
       int config = 0;
-      for (int g = 0; g < 8; g++) if (sample(grid[g]) < lvl) config |= 1 << g;
+      for (int g = 0; g < 8; g++) config |= (sample(grid[g]) < lvl) << g;
 
       // Create the triangles
       const int OTHER[12] = { 1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7 };
@@ -369,35 +368,41 @@ private:
       }
    }
 
-   // TODO
-   glm::vec3 verterp(double lvl, glm::vec3 a, glm::vec3 b) const
+   // Returns the midpoint between vectors a and b, lvl is unused
+   glm::vec3 verterp0(double lvl, glm::vec3 a, glm::vec3 b) const
+   {
+      return (a + b) / 2.0f;
+   }
+
+   // Interpolates along the edge according to lvl and the vertex samples
+   glm::vec3 verterp1(double lvl, glm::vec3 a, glm::vec3 b) const
    {
       if (glm::abs(lvl       - sample(a)) < 1e-5) return a;
       if (glm::abs(lvl       - sample(b)) < 1e-5) return b;
       if (glm::abs(sample(a) - sample(b)) < 1e-5) return a;
 
-      return a + float((lvl - sample(a)) / (sample(b) - sample(a))) * (b - a);
+      return a + (b - a) * float((lvl - sample(a)) / (sample(b) - sample(a)));
    }
 
-   // TODO
+   // Potentially fills small isosurface cracks during interpolation
    glm::vec3 verterp2(double lvl, glm::vec3 a, glm::vec3 b) const
    {
       if (less(b, a)) std::swap(b, a);
       float s = sample(b) - sample(a);
 
       glm::vec3 r = a;
-      if (glm::abs(s) > 1e-5) r += (b - a) / s * float(lvl - sample(a));
+      if (glm::abs(s) > 1e-5) r += (b - a) * float(lvl - sample(a)) / s;
       return r;
    }
 
-   // TODO
+   // Returns true if vector a is 'less' than vector b
    bool less(glm::vec3 a, glm::vec3 b) const
    {
       for (int d = 0; d < 3; d++) if (a[d] != b[d]) return a[d] < b[d];
       return false;
    }
 
-   // TODO
+   // Returns the value of the noise at position vector v
    double sample(glm::vec3 v) const
    {
       const float SCALE = 16;

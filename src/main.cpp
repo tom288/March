@@ -7,7 +7,6 @@
 #include "shader.hpp"
 #include "camera.hpp"
 #include "chunk.hpp"
-#include "cube.hpp"
 
 // The current camera
 Camera* cam = nullptr;
@@ -70,8 +69,7 @@ GLFWwindow* makeWindow()
    glfwSetScrollCallback(window, scrollCallback);
 
    // Ignore hidden triangles
-   // glEnable(GL_CULL_FACE); // TODO ENABLE
-   std::cout << "WARNING - FACE CULLING DISABED" << std::endl;
+   glEnable(GL_CULL_FACE);
    glEnable(GL_DEPTH_TEST);
 
    // Configure vertical sync
