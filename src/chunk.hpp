@@ -6,7 +6,7 @@
 #include <vector>
 #include "osn.h"
 
-// The triangulation table for all 256 possible configurations
+// Triangulation table for all possible configurations
 static const GLuint64 tris[256] = {        0xffffffffffffffff,
    0x083fffffffffffff, 0x019fffffffffffff, 0x183981ffffffffff,
    0x12afffffffffffff, 0x08312affffffffff, 0x92a029ffffffffff,
@@ -116,28 +116,38 @@ class Chunk
                polygonise(glm::vec3(x, y, z), 0);
 
       // TODO
-      size_t s = sizeof(verts[0]);
+      size_t s = sizeof(positions[0]);
       glGenVertexArrays(1, &VAO);
-      glGenBuffers(1, &VBO);
+
+      glGenBuffers(1, &VBO_POS);
       glBindVertexArray(VAO);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
-      glBufferData(GL_ARRAY_BUFFER, verts.size() * s,
-                                    verts.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * s, (GLvoid*)0);
+      glBindBuffer(GL_ARRAY_BUFFER, VBO_POS);
+      glBufferData(GL_ARRAY_BUFFER, positions.size() * s,
+                                    positions.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * s, (GLvoid*)0);
       glEnableVertexAttribArray(0);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * s, (GLvoid*)(3 * s));
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+      glGenBuffers(1, &VBO_COL);
+      glBindVertexArray(VAO);
+      glBindBuffer(GL_ARRAY_BUFFER, VBO_COL);
+      glBufferData(GL_ARRAY_BUFFER, colours.size() * s,
+                                    colours.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * s, (GLvoid*)0);
       glEnableVertexAttribArray(1);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
+
       glBindVertexArray(0);
 
-      std::cout << verts.size() << " verts" << std::endl;
+      std::cout << positions.size() / 9 << " tris" << std::endl;
    }
 
    // TODO
    ~Chunk()
    {
       glDeleteVertexArrays(1, &VAO);
-      glDeleteBuffers(1, &VBO);
+      glDeleteBuffers(1, &VBO_POS);
+      glDeleteBuffers(1, &VBO_COL);
    }
 
    // TODO
@@ -150,22 +160,22 @@ class Chunk
    void draw() const
    {
       glBindVertexArray(VAO);
-      glDrawArrays(GL_TRIANGLES, 0, verts.size() / 6);
+      glDrawArrays(GL_TRIANGLES, 0, positions.size() / 3);
       glBindVertexArray(0);
    }
 
 private:
 
-   // TODO
-   GLuint VBO, VAO;
+   // GPU object references
+   GLuint VAO, VBO_POS, VBO_COL;
 
-   // TODO
+   // Model matrix
    glm::mat4 model;
 
-   // TODO
-   std::vector<GLfloat> verts;
+   // Vertex attributes
+   std::vector<GLfloat> positions, colours;
 
-   // TODO
+   // OpenSimplex noise context
    osn_context* ctx;
 
    // Generates the mesh for position pos
@@ -189,17 +199,19 @@ private:
          // Vertex position data
          for (int d = 0; d < 3; d++)
          {
-            verts.push_back(verterp2(lvl, grid[t % 8], grid[OTHER[t]])[d]);
+            positions.push_back(verterp2(lvl, grid[t % 8], grid[OTHER[t]])[d]);
          }
 
          // Vertex colour data
-         verts.push_back(glm::abs(sample(pos * .5f + glm::vec3(9000, 0, 0))));
-         verts.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 9000, 0))));
-         verts.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 0, 9000))));
-
-         /* verts.push_back((verts.size() / 18 * 86969 % 76963) / 76962.0f);
-         verts.push_back((verts.size() / 18 * 83663 % 78623) / 78623.0f);
-         verts.push_back((verts.size() / 18 * 84653 % 73387) / 73387.0f); */
+         if (v % 3 == 2)
+         {
+            for (int t = 0; t < 3; t++)
+            {
+               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(9000, 0, 0))));
+               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 9000, 0))));
+               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 0, 9000))));
+            }
+         }
       }
    }
 

@@ -91,8 +91,8 @@ private:
    const double FOV_MAX = 170;
    const double NEAR = 0.1;
    const double FAR = 1000.0;
-   const double ACC = 300.0;
-   const double MAXSPD = 50.0;
+   const double ACC = 200.0;
+   const double MAXSPD = 20.0;
    const double FRICTION = 0.0001;
 
    // Kinematics
