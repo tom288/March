@@ -115,25 +115,27 @@ class Chunk
             for (int z = -SIZE / 2; z < SIZE / 2; z++)
                polygonise(glm::vec3(x, y, z), 0);
 
-      // TODO
-      size_t s = sizeof(positions[0]);
       glGenVertexArrays(1, &VAO);
 
+      // Vertex positions
       glGenBuffers(1, &VBO_POS);
       glBindVertexArray(VAO);
       glBindBuffer(GL_ARRAY_BUFFER, VBO_POS);
-      glBufferData(GL_ARRAY_BUFFER, positions.size() * s,
+      glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(positions[0]),
                                     positions.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * s, (GLvoid*)0);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(positions[0]),
+                                                                   (GLvoid*)0);
       glEnableVertexAttribArray(0);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+      // Vertex colours
       glGenBuffers(1, &VBO_COL);
       glBindVertexArray(VAO);
       glBindBuffer(GL_ARRAY_BUFFER, VBO_COL);
-      glBufferData(GL_ARRAY_BUFFER, colours.size() * s,
+      glBufferData(GL_ARRAY_BUFFER, colours.size() * sizeof(colours[0]),
                                     colours.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * s, (GLvoid*)0);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(colours[0]),
+                                                                 (GLvoid*)0);
       glEnableVertexAttribArray(1);
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -205,11 +207,27 @@ private:
          // Vertex colour data
          if (v % 3 == 2)
          {
+            // TODO Use a better method to find the triangle centers
+            glm::vec3 triPos(0, 0, 0);
+
             for (int t = 0; t < 3; t++)
             {
-               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(9000, 0, 0))));
-               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 9000, 0))));
-               colours.push_back(glm::abs(sample(pos * .5f + glm::vec3(0, 0, 9000))));
+               glm::vec3 vertPos;
+               for (int d = 0; d < 3; d++)
+               {
+                  vertPos[d] = positions[positions.size() - 9 + d + t * 3];
+               }
+               triPos += vertPos / 3.0f;
+            }
+
+            for (int t = 0; t < 3; t++)
+            {
+               for (int d = 0; d < 3; d++)
+               {
+                  glm::vec3 offset(0, 0, 0);
+                  offset[d] = 9000;
+                  colours.push_back(glm::abs(sample(triPos * .5f + offset)));
+               }
             }
          }
       }
