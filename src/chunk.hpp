@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
+#include <iomanip>
 #include "osn.h"
 
 // Triangulation table for all possible configurations
@@ -141,7 +142,12 @@ class Chunk
 
       glBindVertexArray(0);
 
-      std::cout << positions.size() / 9 << " tris" << std::endl;
+      // Print number of tris
+      double tris = positions.size() / 9;
+      int index = 0;
+      while ((tris /= 1000.0) >= 1000.0) index++;
+      std::cout << std::setprecision(3) << tris << "KMBT?"[index]
+                                                << " TRIS" << std::endl;
    }
 
    // TODO
@@ -174,8 +180,11 @@ private:
    // Model matrix
    glm::mat4 model;
 
-   // Vertex attributes
-   std::vector<GLfloat> positions, colours;
+   // Vertex positions
+   std::vector<GLfloat> positions;
+
+   // Vertex colours
+   std::vector<GLfloat> colours;
 
    // OpenSimplex noise context
    osn_context* ctx;
