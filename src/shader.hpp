@@ -5,6 +5,9 @@
 #include <fstream>
 #include <sstream>
 
+// The relative path from the executable where the shaders are found
+static const std::string FOLDER = "src/glsl/";
+
 class Shader
 { public:
 
@@ -14,8 +17,6 @@ class Shader
    // Constructor compiles and links shader source
    Shader(std::string vertPath, std::string fragPath)
    {
-      const std::string FOLDER = "src/glsl/";
-
       std::string vertCode;
       std::string fragCode;
       std::ifstream vShaderFile;

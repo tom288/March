@@ -96,21 +96,30 @@ static const GLuint64 tris[256] = {        0xffffffffffffffff,
    0x091fffffffffffff, 0x038fffffffffffff, 0xffffffffffffffff
 };
 
+// Chunk side length
+static const int SIZE = 128;
+
+// Geometry noise scale
+static const float GSCALE = 8;
+
+// Colour relative noise scale
+static const float CSCALE = 2;
+
 class Chunk
 { public:
 
    // TODO
    Chunk()
    {
+      // Use the identity matrix
       model = glm::mat4(1.0f);
 
-      // TODO
+      // Create the OpenSimplex noise context
       int64_t seed = 0;
       ctx = nullptr;
       open_simplex_noise(seed, &ctx);
 
-      const int SIZE = 128;
-
+      // Generate mesh
       for       (int x = -SIZE / 2; x < SIZE / 2; x++)
          for    (int y = -SIZE / 2; y < SIZE / 2; y++)
             for (int z = -SIZE / 2; z < SIZE / 2; z++)
@@ -119,9 +128,9 @@ class Chunk
       glGenVertexArrays(1, &VAO);
 
       // Vertex positions
-      glGenBuffers(1, &VBO_POS);
+      glGenBuffers(1, &posVBO);
       glBindVertexArray(VAO);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO_POS);
+      glBindBuffer(GL_ARRAY_BUFFER, posVBO);
       glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(positions[0]),
                                     positions.data(), GL_STATIC_DRAW);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(positions[0]),
@@ -130,9 +139,9 @@ class Chunk
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
       // Vertex colours
-      glGenBuffers(1, &VBO_COL);
+      glGenBuffers(1, &colVBO);
       glBindVertexArray(VAO);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO_COL);
+      glBindBuffer(GL_ARRAY_BUFFER, colVBO);
       glBufferData(GL_ARRAY_BUFFER, colours.size() * sizeof(colours[0]),
                                     colours.data(), GL_STATIC_DRAW);
       glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(colours[0]),
@@ -150,15 +159,15 @@ class Chunk
                                                 << " TRIS" << std::endl;
    }
 
-   // TODO
+   // Frees GPU memory
    ~Chunk()
    {
       glDeleteVertexArrays(1, &VAO);
-      glDeleteBuffers(1, &VBO_POS);
-      glDeleteBuffers(1, &VBO_COL);
+      glDeleteBuffers(1, &posVBO);
+      glDeleteBuffers(1, &colVBO);
    }
 
-   // TODO
+   // Returns the model matrix
    glm::mat4 getModel() const
    {
       return model;
@@ -175,7 +184,7 @@ class Chunk
 private:
 
    // GPU object references
-   GLuint VAO, VBO_POS, VBO_COL;
+   GLuint VAO, posVBO, colVBO;
 
    // Model matrix
    glm::mat4 model;
@@ -216,7 +225,6 @@ private:
          // Vertex colour data
          if (v % 3 == 2)
          {
-            // TODO Use a better method to find the triangle centers
             glm::vec3 triPos(0, 0, 0);
 
             for (int t = 0; t < 3; t++)
@@ -235,7 +243,7 @@ private:
                {
                   glm::vec3 offset(0, 0, 0);
                   offset[d] = 9000;
-                  colours.push_back(glm::abs(sample(triPos * .5f + offset)));
+                  colours.push_back(glm::abs(sample(triPos / CSCALE + offset)));
                }
             }
          }
@@ -279,8 +287,7 @@ private:
    // Returns the value of the noise at position vector v
    double sample(glm::vec3 v) const
    {
-      const float SCALE = 8;
-      return open_simplex_noise3(ctx, v.x / SCALE, v.y / SCALE, v.z / SCALE);
+      return open_simplex_noise3(ctx, v.x / GSCALE, v.y / GSCALE, v.z / GSCALE);
    }
 };
 

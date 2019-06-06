@@ -4,6 +4,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// Constants
+static const glm::dvec3 UP = glm::dvec3(0.0, 1.0, 0.0);
+static const double PITCH_MAX = 89.0;
+static const double FOV_MIN = 10;
+static const double FOV_MAX = 170;
+static const double NEAR = 0.1;
+static const double FAR = 1000.0;
+static const double ACC = 200.0;
+static const double MAXSPD = 20.0;
+static const double FRICTION = 0.0001;
+
 class Camera
 { public:
 
@@ -83,17 +94,6 @@ class Camera
    }
 
 private:
-
-   // Constants
-   const glm::dvec3 UP = glm::dvec3(0.0, 1.0, 0.0);
-   const double PITCH_MAX = 89.0;
-   const double FOV_MIN = 10;
-   const double FOV_MAX = 170;
-   const double NEAR = 0.1;
-   const double FAR = 1000.0;
-   const double ACC = 200.0;
-   const double MAXSPD = 20.0;
-   const double FRICTION = 0.0001;
 
    // Kinematics
    glm::dvec3 position;
