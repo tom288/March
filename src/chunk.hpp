@@ -155,8 +155,7 @@ class Chunk
       double tris = positions.size() / 9;
       int index = 0;
       while ((tris /= 1000.0) >= 1000.0) index++;
-      std::cout << std::setprecision(3) << tris << "KMBT?"[index]
-                                                << " TRIS" << std::endl;
+      std::cout << std::setprecision(3) << tris << "KMBT?"[index] << " TRIS\n";
    }
 
    // Frees GPU memory
@@ -214,7 +213,7 @@ private:
 
       // Create the triangles
       const int OTHER[12] = { 1, 2, 3, 0, 5, 6, 7, 4, 4, 5, 6, 7 };
-      for (int t, v = 0; (t = tris[config] >> (15 - v) * 4 & 0xf) != 0xf; v++)
+      for (int t, v = 0; (t = tris[config] >> (15 - v) * 4 & 0xf) != 0xf; )
       {
          // Vertex position data
          for (int d = 0; d < 3; d++)
@@ -223,7 +222,7 @@ private:
          }
 
          // Vertex colour data
-         if (v % 3 == 2)
+         if (++v % 3 == 0)
          {
             glm::vec3 triPos(0, 0, 0);
 
@@ -266,7 +265,7 @@ private:
       return a + (b - a) * float((lvl - sample(a)) / (sample(b) - sample(a)));
    }
 
-   // Potentially fills small isosurface cracks during interpolation
+   // Supposedly fills small isosurface cracks during interpolation
    glm::vec3 verterp2(double lvl, glm::vec3 a, glm::vec3 b) const
    {
       if (less(b, a)) std::swap(b, a);
