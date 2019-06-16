@@ -137,6 +137,7 @@ class Chunk
    ~Chunk()
    {
       free();
+      delete[] dug;
    }
 
    // Returns the model matrix
@@ -157,21 +158,37 @@ class Chunk
    }
 
    // TODO
-   void dig(glm::vec3 v, int amount)
+   void dig(glm::vec3 v, float amount)
    {
-      float radius = 5.0f;
-      for       (int x = glm::floor(v.x - radius); x <= glm::ceil(v.x + radius); x++)
-         for    (int y = glm::floor(v.y - radius); y <= glm::ceil(v.y + radius); y++)
-            for (int z = glm::floor(v.z - radius); z <= glm::ceil(v.z + radius); z++)
+      const float RADIUS = 3.0f;
+      bool changed = false;
+
+      for       (int x = glm::floor(v.x - RADIUS); x <= glm::ceil(v.x + RADIUS); x++)
+         for    (int y = glm::floor(v.y - RADIUS); y <= glm::ceil(v.y + RADIUS); y++)
+            for (int z = glm::floor(v.z - RADIUS); z <= glm::ceil(v.z + RADIUS); z++)
             {
-               size_t t = dindex(glm::vec3(x, y, z));
+               glm::vec3 w(x, y, z);
+               size_t t = dindex(w);
+
+               if (t == SIZE_MAX) continue;
+
+               float length = glm::length(v - w);
+               int a = amount * glm::clamp(1.0f - length / RADIUS, 0.0f, 1.0f);
+               if (a == 0) continue;
+
                GLubyte old = dug[t];
-               dug[dindex(glm::vec3(x, y, z))] += amount;
-               while (glm::sign(dug[t] - old) != glm::sign(amount)
-                   && glm::sign(dug[t] - old) != 0) dug[t] -= glm::sign(amount);
+               double oldSample = sample(v);
+
+               dug[t] += glm::clamp(a, -old, 255 - old);
+               if (dug[t] != old) changed = true;
+               // TODO if (dug[t] != old && sample(v) != oldSample)
             }
-      free();
-      generate();
+
+      if (changed)
+      {
+         free();
+         generate();
+      }
    }
 
 private:
@@ -194,7 +211,7 @@ private:
    // TODO
    GLubyte* dug;
 
-   // Frees dynamically allocated memory
+   // Frees some of the dynamically allocated memory
    void free()
    {
       // Free VRAM
@@ -205,7 +222,6 @@ private:
       // Free RAM
       positions.clear();
       colours.clear();
-      delete[] dug;
    }
 
    // Generates chunk data
@@ -345,6 +361,7 @@ private:
    // Returns the value of manual deformation at position vector v
    double deformity(glm::vec3 v) const
    {
+      if (dindex(v) == SIZE_MAX) std::cout << "ERROR 73474\n";
       return dug[dindex(v)] / 128.0 - 1.0;
    }
 
@@ -352,6 +369,7 @@ private:
    static size_t dindex(glm::vec3 v)
    {
       glm::vec3 w = v + glm::vec3(SIZE / 2.0);
+      for (int d = 0; d < 3; d++) if (w[d] < 0 || w[d] > SIZE) return SIZE_MAX;
       return w.x * SIZE * SIZE + w.y * SIZE + w.z;
    }
 };
