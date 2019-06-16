@@ -28,6 +28,23 @@ class Camera
       setFOV(90);
    }
 
+   // Returns the view matrix
+   glm::mat4 getView() const
+   {
+      return view;
+   }
+
+   // Returns the projection matrix
+   glm::mat4 getProjection() const
+   {
+      return projection;
+   }
+
+   glm::vec3 getPosition() const
+   {
+      return position;
+   }
+
    // Uses mouse input to reorient the camera
    void moveMouse(double dx, double dy)
    {
@@ -49,18 +66,6 @@ class Camera
       this->fov = glm::clamp(fov, FOV_MIN, FOV_MAX);
 
       calcProjection();
-   }
-
-   // Returns the view matrix
-   glm::mat4 getView() const
-   {
-      return view;
-   }
-
-   // Returns the projection matrix
-   glm::mat4 getProjection() const
-   {
-      return projection;
    }
 
    // Moves the camera according to velocity, input and time since last step

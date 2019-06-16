@@ -17,10 +17,8 @@ class Shader
    // Constructor compiles and links shader source
    Shader(std::string vertPath, std::string fragPath)
    {
-      std::string vertCode;
-      std::string fragCode;
-      std::ifstream vShaderFile;
-      std::ifstream fShaderFile;
+      std::string vertCode, fragCode;
+      std::ifstream vShaderFile, fShaderFile;
 
       // Ensure ifstream objects can throw exceptions
       vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -28,8 +26,9 @@ class Shader
 
       try
       {
-         // Open files
          std::stringstream vShaderStream, fShaderStream;
+
+         // Open files
          vShaderFile.open(FOLDER + vertPath);
          fShaderFile.open(FOLDER + fragPath);
 

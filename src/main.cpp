@@ -11,6 +11,9 @@
 // The current camera
 Camera* cam = nullptr;
 
+// The current Chunk
+Chunk* chunk = nullptr;
+
 // Keyboard input callback
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
 {
@@ -32,7 +35,7 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
 // Mouse button input callback
 void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
 {
-   // TODO
+   if (action == GLFW_PRESS && cam && chunk) chunk -> dig(cam->getPosition(), 100);
 }
 
 // Mouse scroll wheel movement callback
@@ -114,8 +117,9 @@ int main()
    }
 
    cam = new Camera();
+   chunk = new Chunk();
+
    Shader shader("persp");
-   Chunk chunk;
 
    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
@@ -151,10 +155,10 @@ int main()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       shader.use();
-      shader.setMat4("model", chunk.getModel());
+      shader.setMat4("model", chunk->getModel());
       shader.setMat4("view", cam->getView());
       shader.setMat4("projection", cam->getProjection());
-      chunk.draw();
+      chunk->draw();
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -162,5 +166,6 @@ int main()
 
    glfwTerminate();
    delete cam;
+   delete chunk;
    return 0;
 }

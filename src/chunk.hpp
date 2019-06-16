@@ -119,6 +119,98 @@ class Chunk
       ctx = nullptr;
       open_simplex_noise(seed, &ctx);
 
+      // TODO
+      dug = new GLubyte[(size_t)glm::pow(SIZE + 1, 3)];
+      for (int i = 0; i < glm::pow(SIZE + 1, 3); i++) dug[i] = 128;
+
+      // TODO
+      generate();
+
+      // Print number of tris
+      double tris = positions.size() / 9;
+      int index = 0;
+      while ((tris /= 1000.0) >= 1000.0) index++;
+      std::cout << std::setprecision(3) << tris << "KMBT?"[index] << " TRIS\n";
+   }
+
+   // Frees dynamically allocated memory
+   ~Chunk()
+   {
+      free();
+   }
+
+   // Returns the model matrix
+   glm::mat4 getModel() const
+   {
+      return model;
+   }
+
+   // TODO
+   void draw() const
+   {
+      if (positions.size() > 0)
+      {
+         glBindVertexArray(VAO);
+         glDrawArrays(GL_TRIANGLES, 0, positions.size() / 3);
+         glBindVertexArray(0);
+      }
+   }
+
+   // TODO
+   void dig(glm::vec3 v, int amount)
+   {
+      float radius = 5.0f;
+      for       (int x = glm::floor(v.x - radius); x <= glm::ceil(v.x + radius); x++)
+         for    (int y = glm::floor(v.y - radius); y <= glm::ceil(v.y + radius); y++)
+            for (int z = glm::floor(v.z - radius); z <= glm::ceil(v.z + radius); z++)
+            {
+               size_t t = dindex(glm::vec3(x, y, z));
+               GLubyte old = dug[t];
+               dug[dindex(glm::vec3(x, y, z))] += amount;
+               while (glm::sign(dug[t] - old) != glm::sign(amount)
+                   && glm::sign(dug[t] - old) != 0) dug[t] -= glm::sign(amount);
+            }
+      free();
+      generate();
+   }
+
+private:
+
+   // GPU object references
+   GLuint VAO, posVBO, colVBO;
+
+   // Model matrix
+   glm::mat4 model;
+
+   // Vertex positions
+   std::vector<GLfloat> positions;
+
+   // Vertex colours
+   std::vector<GLfloat> colours;
+
+   // OpenSimplex noise context
+   osn_context* ctx;
+
+   // TODO
+   GLubyte* dug;
+
+   // Frees dynamically allocated memory
+   void free()
+   {
+      // Free VRAM
+      glDeleteVertexArrays(1, &VAO);
+      glDeleteBuffers(1, &posVBO);
+      glDeleteBuffers(1, &colVBO);
+
+      // Free RAM
+      positions.clear();
+      colours.clear();
+      delete[] dug;
+   }
+
+   // Generates chunk data
+   void generate()
+   {
       // Generate mesh
       for       (int x = -SIZE / 2; x < SIZE / 2; x++)
          for    (int y = -SIZE / 2; y < SIZE / 2; y++)
@@ -150,52 +242,7 @@ class Chunk
       glBindBuffer(GL_ARRAY_BUFFER, 0);
 
       glBindVertexArray(0);
-
-      // Print number of tris
-      double tris = positions.size() / 9;
-      int index = 0;
-      while ((tris /= 1000.0) >= 1000.0) index++;
-      std::cout << std::setprecision(3) << tris << "KMBT?"[index] << " TRIS\n";
    }
-
-   // Frees GPU memory
-   ~Chunk()
-   {
-      glDeleteVertexArrays(1, &VAO);
-      glDeleteBuffers(1, &posVBO);
-      glDeleteBuffers(1, &colVBO);
-   }
-
-   // Returns the model matrix
-   glm::mat4 getModel() const
-   {
-      return model;
-   }
-
-   // TODO
-   void draw() const
-   {
-      glBindVertexArray(VAO);
-      glDrawArrays(GL_TRIANGLES, 0, positions.size() / 3);
-      glBindVertexArray(0);
-   }
-
-private:
-
-   // GPU object references
-   GLuint VAO, posVBO, colVBO;
-
-   // Model matrix
-   glm::mat4 model;
-
-   // Vertex positions
-   std::vector<GLfloat> positions;
-
-   // Vertex colours
-   std::vector<GLfloat> colours;
-
-   // OpenSimplex noise context
-   osn_context* ctx;
 
    // Generates the mesh for position pos
    void polygonise(glm::vec3 pos, double lvl)
@@ -242,7 +289,7 @@ private:
                {
                   glm::vec3 offset(0, 0, 0);
                   offset[d] = 9000;
-                  colours.push_back(glm::abs(sample(triPos / CSCALE + offset)));
+                  colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
                }
             }
          }
@@ -284,9 +331,28 @@ private:
    }
 
    // Returns the value of the noise at position vector v
-   double sample(glm::vec3 v) const
+   double noise(glm::vec3 v) const
    {
       return open_simplex_noise3(ctx, v.x / GSCALE, v.y / GSCALE, v.z / GSCALE);
+   }
+
+   // Returns the value of the geometry information at position vector v
+   double sample(glm::vec3 v) const
+   {
+      return glm::clamp(noise(v) + deformity(v), -1.0, 1.0);
+   }
+
+   // Returns the value of manual deformation at position vector v
+   double deformity(glm::vec3 v) const
+   {
+      return dug[dindex(v)] / 128.0 - 1.0;
+   }
+
+   // Returns the position in dug corresponding to vector v
+   static size_t dindex(glm::vec3 v)
+   {
+      glm::vec3 w = v + glm::vec3(SIZE / 2.0);
+      return w.x * SIZE * SIZE + w.y * SIZE + w.z;
    }
 };
 
