@@ -7,6 +7,7 @@
 #include "shader.hpp"
 #include "camera.hpp"
 #include "chunk.hpp"
+#include "world.hpp"
 
 // The current camera
 Camera* cam = nullptr;
@@ -37,7 +38,7 @@ void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
 {
    if (cam && chunk && action == GLFW_PRESS)
    {
-      chunk -> dig(cam->getPosition(), 4.0f, 100.0f);
+      chunk->dig(cam->getPosition(), 4.0f, 100.0f);
    }
 }
 
@@ -120,7 +121,7 @@ int main()
    }
 
    cam = new Camera();
-   chunk = new Chunk();
+   chunk = new Chunk(glm::vec3(0));
 
    Shader shader("persp");
 

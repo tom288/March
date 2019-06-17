@@ -75,23 +75,25 @@ static const GLuint64 tris[256] = {
 0x138918ffffffffff, 0x091fffffffffffff, 0x038fffffffffffff, 0xffffffffffffffff
 };
 
-// Chunk side length
-static const int SIZE = 128;
-
 // Geometry noise scale
 static const float GSCALE = 8;
 
 // Colour relative noise scale
 static const float CSCALE = 2;
 
+// Minimum distance from center to exterior
+static const int RADIUS = CHUNK_SIZE / 2;
+
 class Chunk
 { public:
 
    // TODO
-   Chunk()
+   Chunk(glm::vec3 position)
    {
+      this->position = position;
+
       // Use the identity matrix
-      model = glm::mat4(1.0f);
+      model = glm::translate(glm::mat4(1.0f), position);
 
       // Create the OpenSimplex noise context
       int64_t seed = 0;
@@ -99,8 +101,8 @@ class Chunk
       open_simplex_noise(seed, &ctx);
 
       // TODO
-      dug = new GLubyte[(size_t)glm::pow(SIZE + 1, 3)];
-      for (int i = 0; i < glm::pow(SIZE + 1, 3); i++) dug[i] = 128;
+      dug = new GLubyte[size_t(glm::pow(CHUNK_SIZE + 1, 3))];
+      for (int i = 0; i < glm::pow(CHUNK_SIZE + 1, 3); i++) dug[i] = 128;
 
       // TODO
       generate();
@@ -128,7 +130,7 @@ class Chunk
    // TODO
    void draw() const
    {
-      if (positions.size() > 0)
+      if (positions.size())
       {
          glBindVertexArray(VAO);
          glDrawArrays(GL_TRIANGLES, 0, positions.size() / 3);
@@ -137,9 +139,10 @@ class Chunk
    }
 
    // TODO
-   void dig(glm::vec3 v, float rad, float amt)
+   void dig(glm::vec3 pos, float rad, float amt)
    {
       bool changed = false;
+      glm::vec3 v = pos - position;
 
       for       (int x = glm::floor(v.x - rad); x <= glm::ceil(v.x + rad); x++)
          for    (int y = glm::floor(v.y - rad); y <= glm::ceil(v.y + rad); y++)
@@ -168,6 +171,9 @@ class Chunk
    }
 
 private:
+
+   // The position of the chunk
+   glm::vec3 position;
 
    // GPU object references
    GLuint VAO, posVBO, colVBO;
@@ -204,9 +210,9 @@ private:
    void generate()
    {
       // Generate mesh
-      for       (int x = -SIZE / 2; x < SIZE / 2; x++)
-         for    (int y = -SIZE / 2; y < SIZE / 2; y++)
-            for (int z = -SIZE / 2; z < SIZE / 2; z++)
+      for       (int x = -RADIUS; x < RADIUS; x++)
+         for    (int y = -RADIUS; y < RADIUS; y++)
+            for (int z = -RADIUS; z < RADIUS; z++)
                polygonise(glm::vec3(x, y, z), 0);
 
       glGenVertexArrays(1, &VAO);
@@ -315,9 +321,10 @@ private:
       return false;
    }
 
-   // Returns the value of the noise at position vector v
-   double noise(glm::vec3 v) const
+   // Returns the value of the noise at position pos
+   double noise(glm::vec3 pos) const
    {
+      glm::vec3 v = pos + position;
       return open_simplex_noise3(ctx, v.x / GSCALE, v.y / GSCALE, v.z / GSCALE);
    }
 
@@ -330,16 +337,15 @@ private:
    // Returns the value of manual deformation at position vector v
    double deformity(glm::vec3 v) const
    {
-      if (dindex(v) == SIZE_MAX) std::cout << "ERROR 73474\n";
       return dug[dindex(v)] / 128.0 - 1.0;
    }
 
-   // Returns the position in dug corresponding to vector v
+   // Returns the position in dug corresponding to position pos
    static size_t dindex(glm::vec3 v)
    {
-      glm::vec3 w = v + glm::vec3(SIZE / 2.0);
-      for (int d = 0; d < 3; d++) if (w[d] < 0 || w[d] > SIZE) return SIZE_MAX;
-      return w.x * SIZE * SIZE + w.y * SIZE + w.z;
+      for (int d = 0; d < 3; d++) if (glm::abs(v[d]) > RADIUS) return SIZE_MAX;
+      glm::vec3 w = v + glm::vec3(RADIUS);
+      return w.x + CHUNK_SIZE * (w.y + CHUNK_SIZE * w.z);
    }
 };
 
