@@ -3,7 +3,8 @@
 echo BUILDING...
 
 g++ -std=c++11 -Wall -Og -march=native -o launch.exe ^
-src/main.cpp src/osn.c ^
+src/main.cpp ^
+src/osn.c ^
 -I "lib\glfw\include" ^
 -I "lib\glm" ^
 -I "lib\glew\include" ^

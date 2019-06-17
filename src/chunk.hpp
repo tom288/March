@@ -106,10 +106,10 @@ class Chunk
       generate();
 
       // Print number of tris
-      double tris = positions.size() / 9;
+      double t = positions.size() / 9;
       int index = 0;
-      while ((tris /= 1000.0) >= 1000.0) index++;
-      std::cout << std::setprecision(3) << tris << "KMBT?"[index] << " TRIS\n";
+      while ((t /= 1000.0) >= 1000.0) index++;
+      std::cout << std::setprecision(3) << t << "KMBT?"[index] << " TRIS\n";
    }
 
    // Frees dynamically allocated memory
@@ -243,7 +243,8 @@ private:
       glm::vec3 grid[8];
       for (int g = 0; g < 8; g++)
       {
-         grid[g] = pos + glm::vec3((g + 1) % 4 / 2, g / 4, g % 4 / 2);
+         // TODO fix this abomination (g % 2, g / 2 % 2, g / 4)
+         grid[g] = pos + glm::vec3((g + 1) / 2 % 2, g / 4, g / 2 % 2);
       }
 
       // Determine the configuration index
@@ -251,38 +252,30 @@ private:
       for (int g = 0; g < 8; g++) config |= (sample(grid[g]) < lvl) << g;
 
       // Create the triangles
-      for (int t, v = 0; (t = tris[config] >> (15 - v) * 4 & 0xf) != 0xf; )
+      for (int v, i = 0; (v = tris[config] >> (15 - i) * 4 & 0xf) != 0xf; )
       {
          // Vertex position data
          for (int d = 0; d < 3; d++)
          {
-            GLubyte other = 0123056744567 >> (11 - t) * 3 & 7;
-            positions.push_back(verterp2(lvl, grid[t % 8], grid[other])[d]);
+            GLubyte other = 0123056744567 >> (11 - v) * 3 & 7;
+            positions.push_back(verterp2(lvl, grid[v % 8], grid[other])[d]);
          }
 
          // Vertex colour data
-         if (++v % 3 == 0)
+         if (++i % 3 == 0)
          {
-            glm::vec3 triPos(0, 0, 0);
+            glm::vec3 triPos(0);
 
-            for (int t = 0; t < 3; t++)
+            for (int c = 0; c < 9; c++)
             {
-               glm::vec3 vertPos;
-               for (int d = 0; d < 3; d++)
-               {
-                  vertPos[d] = positions[positions.size() - 9 + t * 3 + d];
-               }
-               triPos += vertPos / 3.0f;
+               triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
             }
 
-            for (int t = 0; t < 3; t++)
+            for (int c = 0; c < 9; c++)
             {
-               for (int d = 0; d < 3; d++)
-               {
-                  glm::vec3 offset(0, 0, 0);
-                  offset[d] = 9000;
-                  colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
-               }
+               glm::vec3 offset(0);
+               offset[c % 3] = 9000;
+               colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
             }
          }
       }

@@ -12,7 +12,7 @@ static const double FOV_MAX = 170;
 static const double NEAR = 0.1;
 static const double FAR = 1000.0;
 static const double ACC = 200.0;
-static const double MAXSPD = 20.0;
+static const double SPEED_MAX = 20.0;
 static const double FRICTION = 0.0001;
 
 class Camera
@@ -63,7 +63,7 @@ class Camera
    // Changes the FOV and recalculates the projection matrix
    void setFOV(double fov)
    {
-      this->fov = glm::clamp(fov, FOV_MIN, FOV_MAX);
+      this->fov = glm::radians(glm::clamp(fov, FOV_MIN, FOV_MAX));
 
       calcProjection();
    }
@@ -86,9 +86,9 @@ class Camera
 
          velocity += acceleration * time * ACC;
 
-         if (glm::length(velocity) > MAXSPD)
+         if (glm::length(velocity) > SPEED_MAX)
          {
-            velocity = glm::normalize(velocity) * MAXSPD;
+            velocity = glm::normalize(velocity) * SPEED_MAX;
          }
       }
 
@@ -141,8 +141,7 @@ private:
    // Calculates the new projection matrix
    void calcProjection()
    {
-      double rad = glm::radians(fov);
-      projection = glm::perspective(rad, double(WIN_W) / WIN_H, NEAR, FAR);
+      projection = glm::perspective(fov, double(WIN_W) / WIN_H, NEAR, FAR);
    }
 };
 
