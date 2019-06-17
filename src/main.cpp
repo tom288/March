@@ -35,7 +35,10 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
 // Mouse button input callback
 void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
 {
-   if (action == GLFW_PRESS && cam && chunk) chunk -> dig(cam->getPosition(), 100);
+   if (cam && chunk && action == GLFW_PRESS)
+   {
+      chunk -> dig(cam->getPosition(), 4.0f, 100.0f);
+   }
 }
 
 // Mouse scroll wheel movement callback
