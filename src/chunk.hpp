@@ -107,11 +107,15 @@ class Chunk
       // TODO
       generate();
 
+#if 0
       // Print number of tris
       double t = positions.size() / 9;
       int index = 0;
       while ((t /= 1000.0) >= 1000.0) index++;
-      std::cout << std::setprecision(3) << t << "KMBT?"[index] << " TRIS\n";
+      std::streamsize s = std::cout.precision();
+      std::cout << std::setprecision(3) << t << "KMBT?"[index] << " TRIS\n"
+                << std::setprecision(s);
+#endif
    }
 
    // Frees dynamically allocated memory
@@ -270,8 +274,7 @@ private:
          // Vertex colour data
          if (++i % 3 == 0)
          {
-            glm::vec3 triPos(0);
-
+            glm::vec3 triPos = glm::vec3(0) - position;
             for (int c = 0; c < 9; c++)
             {
                triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
@@ -345,7 +348,7 @@ private:
    {
       for (int d = 0; d < 3; d++) if (glm::abs(v[d]) > RADIUS) return SIZE_MAX;
       glm::vec3 w = v + glm::vec3(RADIUS);
-      return w.x + CHUNK_SIZE * (w.y + CHUNK_SIZE * w.z);
+      return w.x + (CHUNK_SIZE + 1) * (w.y + (CHUNK_SIZE + 1) * w.z);
    }
 };
 

@@ -13,7 +13,7 @@
 Camera* cam = nullptr;
 
 // The current Chunk
-Chunk* chunk = nullptr;
+World* world = nullptr;
 
 // Keyboard input callback
 void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods)
@@ -36,9 +36,9 @@ void cursorPosCallback(GLFWwindow* win, double xpos, double ypos)
 // Mouse button input callback
 void mouseButtonCallback(GLFWwindow* win, int button, int action, int mods)
 {
-   if (cam && chunk && action == GLFW_PRESS)
+   if (cam && world && action == GLFW_PRESS)
    {
-      chunk->dig(cam->getPosition(), 4.0f, 100.0f);
+      world->dig(cam->getPosition(), 4.0f, 100.0f);
    }
 }
 
@@ -121,7 +121,7 @@ int main()
    }
 
    cam = new Camera();
-   chunk = new Chunk(glm::vec3(0));
+   world = new World();
 
    Shader shader("persp");
 
@@ -159,10 +159,9 @@ int main()
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       shader.use();
-      shader.setMat4("model", chunk->getModel());
       shader.setMat4("view", cam->getView());
       shader.setMat4("projection", cam->getProjection());
-      chunk->draw();
+      world->draw(shader);
 
       glfwSwapBuffers(window);
       glfwPollEvents();
@@ -170,6 +169,6 @@ int main()
 
    glfwTerminate();
    delete cam;
-   delete chunk;
+   delete world;
    return 0;
 }
