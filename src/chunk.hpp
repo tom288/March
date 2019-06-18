@@ -197,7 +197,7 @@ private:
    // TODO
    GLubyte* dug;
 
-   // Frees some of the dynamically allocated memory
+   // Frees mesh data
    void free()
    {
       // Free VRAM
@@ -343,7 +343,7 @@ private:
       return dug[dindex(v)] / 128.0 - 1.0;
    }
 
-   // Returns the position in dug corresponding to position pos
+   // Returns the index of dug corresponding to position v
    static size_t dindex(glm::vec3 v)
    {
       for (int d = 0; d < 3; d++) if (glm::abs(v[d]) > RADIUS) return SIZE_MAX;
