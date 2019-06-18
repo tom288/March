@@ -28,7 +28,7 @@ class World
       for (int c = 0; c < glm::pow(WORLD_SIZE, 3); c++) delete chunks[c];
    }
 
-   // TODO
+   // Renders all chunks to the screen (the shader must already be set up)
    void draw(Shader shader)
    {
       for (int c = 0; c < glm::pow(WORLD_SIZE, 3); c++)
@@ -53,20 +53,18 @@ class World
 
 private:
 
-   // All of the chunks
+   // List of all chunks
    Chunk* chunks[size_t(glm::pow(WORLD_SIZE, 3))];
 
    // Returns the index of chunks corresponding to position pos
    static size_t cindex(glm::vec3 pos)
    {
-      glm::vec3 v = glm::vec3(WORLD_SIZE / 2) + pos / float(CHUNK_SIZE);
-
+      glm::vec3 v(WORLD_SIZE / 2);
       for (int d = 0; d < 3; d++)
       {
-         v[d] = glm::floor(v[d]);
+         v[d] += glm::floor(pos[d] / float(CHUNK_SIZE));
          if (v[d] >= WORLD_SIZE || v[d] < 0) return SIZE_MAX;
       }
-
       return v.x + WORLD_SIZE * (v.y + WORLD_SIZE * v.z);
    }
 };

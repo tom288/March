@@ -87,7 +87,7 @@ static const int RADIUS = CHUNK_SIZE / 2;
 class Chunk
 { public:
 
-   // TODO
+   // Initialises members and generates the initial mesh
    Chunk(glm::vec3 position)
    {
       this->position = position;
@@ -100,11 +100,11 @@ class Chunk
       ctx = nullptr;
       open_simplex_noise(seed, &ctx);
 
-      // TODO
+      // Initialise deformation information
       dug = new GLubyte[size_t(glm::pow(CHUNK_SIZE + 1, 3))];
       for (int i = 0; i < glm::pow(CHUNK_SIZE + 1, 3); i++) dug[i] = 128;
 
-      // TODO
+      // Generate the mesh
       generate();
 
 #if 0
@@ -131,7 +131,7 @@ class Chunk
       return model;
    }
 
-   // TODO
+   // Renders the chunk to the screen (the shader must already be set up)
    void draw() const
    {
       if (positions.size())
@@ -142,7 +142,7 @@ class Chunk
       }
    }
 
-   // TODO
+   // Deforms the mesh
    void dig(glm::vec3 pos, float rad, float amt)
    {
       bool changed = false;
@@ -194,7 +194,7 @@ private:
    // OpenSimplex noise context
    osn_context* ctx;
 
-   // TODO
+   // Deforation information
    GLubyte* dug;
 
    // Frees mesh data
@@ -274,7 +274,7 @@ private:
          // Vertex colour data
          if (++i % 3 == 0)
          {
-            glm::vec3 triPos = glm::vec3(0) - position;
+            glm::vec3 triPos = -position;
             for (int c = 0; c < 9; c++)
             {
                triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;

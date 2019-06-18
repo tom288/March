@@ -1,4 +1,4 @@
-# Marching Cubes Test ?
+# Marching Cubes Experiment
 
 ## How to install on windows
 1. Clone repo to local directory
