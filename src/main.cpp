@@ -85,7 +85,7 @@ GLFWwindow* makeWindow(const char* title)
    glfwSetScrollCallback(window, scrollCallback);
 
    // Ignore hidden triangles
-   glEnable(GL_CULL_FACE);
+   // glEnable(GL_CULL_FACE); TODO uncomment
    glEnable(GL_DEPTH_TEST);
 
    // Configure vertical sync
@@ -127,7 +127,6 @@ int main()
 
    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
    glfwGetCursorPos(window, &xold, &yold);
-
    size_t frames = 0;
    double deltaTime, oldTime = glfwGetTime(), elapsed = 0;
 

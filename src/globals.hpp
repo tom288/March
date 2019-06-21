@@ -20,7 +20,7 @@
 // Chunk side length
 #define CHUNK_SIZE 16
 
-// Number of chunks along any axis
+// Number of chunks along each axis
 #define WORLD_SIZE 8
 
 #endif

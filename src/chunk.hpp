@@ -217,7 +217,7 @@ private:
       for       (int x = -RADIUS; x < RADIUS; x++)
          for    (int y = -RADIUS; y < RADIUS; y++)
             for (int z = -RADIUS; z < RADIUS; z++)
-               polygonise(glm::vec3(x, y, z), 0);
+               polygonise2(glm::vec3(x, y, z), 0);
 
       glGenVertexArrays(1, &VAO);
 
@@ -286,6 +286,128 @@ private:
                offset[c % 3] = 9000;
                colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
             }
+         }
+      }
+   }
+
+   // TODO
+   void polygonise2(glm::vec3 pos, double lvl)
+   {
+      polygonise2(pos, lvl, 0, 2, 3, 7);
+      polygonise2(pos, lvl, 0, 2, 6, 7);
+      polygonise2(pos, lvl, 0, 4, 6, 7);
+      polygonise2(pos, lvl, 0, 6, 1, 2);
+      polygonise2(pos, lvl, 0, 6, 1, 4);
+      polygonise2(pos, lvl, 5, 6, 1, 4);
+   }
+
+   void polygonise2(glm::vec3 pos, double lvl, int v0, int v1, int v2, int v3)
+   {
+      int v[] = {v0, v1, v2, v3};
+
+      // Populate the grid array
+      glm::vec3 grid[8];
+      for (int g = 0; g < 8; g++)
+      {
+         // TODO fix this abomination (g % 2, g / 2 % 2, g / 4)
+         grid[g] = pos + glm::vec3((g + 1) / 2 % 2, g / 4, g / 2 % 2);
+      }
+
+      // Determine the configuration index
+      int config = 0;
+      for (int g = 0; g < 4; g++) config |= (sample(grid[v[g]]) < lvl) << g;
+
+      int ntri = 0;
+      glm::vec3 tri[6];
+      switch (config)
+      {
+         case 0x00:
+         case 0x0F:
+            break;
+         case 0x0E:
+         case 0x01:
+            tri[0] = verterp2(lvl, grid[v0], grid[v1]);
+            tri[1] = verterp2(lvl, grid[v0], grid[v2]);
+            tri[2] = verterp2(lvl, grid[v0], grid[v3]);
+            ntri++;
+            break;
+         case 0x0D:
+         case 0x02:
+            tri[0] = verterp2(lvl, grid[v1], grid[v0]);
+            tri[1] = verterp2(lvl, grid[v1], grid[v3]);
+            tri[2] = verterp2(lvl, grid[v1], grid[v2]);
+            ntri++;
+            break;
+         case 0x0C:
+         case 0x03:
+            tri[0] = verterp2(lvl, grid[v0], grid[v3]);
+            tri[1] = verterp2(lvl, grid[v0], grid[v2]);
+            tri[2] = verterp2(lvl, grid[v1], grid[v3]);
+            ntri++;
+            tri[3] = tri[2];
+            tri[4] = verterp2(lvl, grid[v1], grid[v2]);
+            tri[5] = tri[1];
+            ntri++;
+            break;
+         case 0x0B:
+         case 0x04:
+            tri[0] = verterp2(lvl, grid[v2], grid[v0]);
+            tri[1] = verterp2(lvl, grid[v2], grid[v1]);
+            tri[2] = verterp2(lvl, grid[v2], grid[v3]);
+            ntri++;
+            break;
+         case 0x0A:
+         case 0x05:
+            tri[0] = verterp2(lvl, grid[v0], grid[v1]);
+            tri[1] = verterp2(lvl, grid[v2], grid[v3]);
+            tri[2] = verterp2(lvl, grid[v0], grid[v3]);
+            ntri++;
+            tri[3] = tri[0];
+            tri[4] = verterp2(lvl, grid[v1], grid[v2]);
+            tri[5] = tri[1];
+            ntri++;
+            break;
+         case 0x09:
+         case 0x06:
+            tri[0] = verterp2(lvl, grid[v0], grid[v1]);
+            tri[1] = verterp2(lvl, grid[v1], grid[v3]);
+            tri[2] = verterp2(lvl, grid[v2], grid[v3]);
+            ntri++;
+            tri[3] = tri[0];
+            tri[4] = verterp2(lvl, grid[v0], grid[v2]);
+            tri[5] = tri[2];
+            ntri++;
+            break;
+         case 0x07:
+         case 0x08:
+            tri[0] = verterp2(lvl, grid[v3], grid[v0]);
+            tri[1] = verterp2(lvl, grid[v3], grid[v2]);
+            tri[2] = verterp2(lvl, grid[v3], grid[v1]);
+            ntri++;
+            break;
+      }
+
+      for (int t = 0; t < ntri; t++)
+      {
+         for (int p = 0; p < 3; p++)
+         {
+            for (int d = 0; d < 3; d++)
+            {
+               positions.push_back(tri[t * 3 + p][d]);
+            }
+         }
+
+         glm::vec3 triPos = -position;
+         for (int c = 0; c < 9; c++)
+         {
+            triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
+         }
+
+         for (int c = 0; c < 9; c++)
+         {
+            glm::vec3 offset(0);
+            offset[c % 3] = 9000;
+            colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
          }
       }
    }
