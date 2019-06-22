@@ -75,14 +75,6 @@ static const GLuint64 tris[256] = {
 0x138918ffffffffff, 0x091fffffffffffff, 0x038fffffffffffff, 0xffffffffffffffff
 };
 
-// TODO
-static const GLuint tetris[16] = {
-   0xffffffff, 0x123fffff, 0x176fffff, 0x372762ff,
-   0x26bfffff, 0x1b31b6ff, 0x17b1b2ff, 0x37bfffff,
-   0x3b7fffff, 0x1b712bff, 0x13b16bff, 0x2b6fffff,
-   0x327726ff, 0x167fffff, 0x132fffff, 0xffffffff
-};
-
 // Geometry noise scale
 static const float GSCALE = 8;
 
@@ -161,18 +153,18 @@ class Chunk
             for (int z = glm::floor(v.z - rad); z <= glm::ceil(v.z + rad); z++)
             {
                glm::vec3 w(x, y, z);
-               size_t t = dindex(w);
-               if (t == SIZE_MAX) continue;
+               size_t i = dindex(w);
+               if (i == SIZE_MAX) continue;
 
                float length = glm::length(v - w);
                int a = amt * glm::clamp(1.0f - length / rad, 0.0f, 1.0f);
                if (a == 0) continue;
 
-               GLubyte old = dug[t];
+               GLubyte old = dug[i];
                double oldSample = sample(w);
 
-               dug[t] += glm::clamp(a, -old, 255 - old);
-               if (dug[t] != old && sample(w) != oldSample) changed = true;
+               dug[i] += glm::clamp(a, -old, 255 - old);
+               if (dug[i] != old && sample(w) != oldSample) changed = true;
             }
 
       if (changed)
@@ -225,7 +217,7 @@ private:
       for       (int x = -RADIUS; x < RADIUS; x++)
          for    (int y = -RADIUS; y < RADIUS; y++)
             for (int z = -RADIUS; z < RADIUS; z++)
-               polygonise2(glm::vec3(x, y, z), 0);
+               polygonise(glm::vec3(x, y, z), 0);
 
       glGenVertexArrays(1, &VAO);
 
@@ -298,56 +290,60 @@ private:
       }
    }
 
-   // TODO
+   // TODO comment, rename
    void polygonise2(glm::vec3 pos, double lvl)
    {
-      polygonise2(pos, lvl, 0, 2, 3, 7);
-      polygonise2(pos, lvl, 0, 2, 6, 7);
-      polygonise2(pos, lvl, 0, 4, 6, 7);
-      polygonise2(pos, lvl, 0, 6, 1, 2);
-      polygonise2(pos, lvl, 0, 6, 1, 4);
-      polygonise2(pos, lvl, 5, 6, 1, 4);
-   }
+      // TODO comment and fix face direction
+      const GLuint tetris[16] = {
+         0xffffffff, 0x123fffff, 0x176fffff, 0x372762ff,
+         0x26bfffff, 0x1b31b6ff, 0x17b1b2ff, 0x37bfffff,
+         0x3b7fffff, 0x1b712bff, 0x13b16bff, 0x2b6fffff,
+         0x327726ff, 0x167fffff, 0x132fffff, 0xffffffff
+      };
 
-   // TODO comment, rename, restructure params
-   void polygonise2(glm::vec3 pos, double lvl, int v0, int v1, int v2, int v3)
-   {
-      int vs[] = {v0, v1, v2, v3};
+      // TODO
+      const int vs[6][4] = {{ 0, 2, 3, 7 }, { 0, 2, 6, 7 }, { 0, 4, 6, 7 },
+                            { 0, 6, 1, 2 }, { 0, 6, 1, 4 }, { 5, 6, 1, 4 }};
 
-      // Populate the grid array
-      glm::vec3 grid[8];
-      for (int g = 0; g < 8; g++)
+      for (int t = 0; t < 6; t++)
       {
-         // TODO fix this abomination (g % 2, g / 2 % 2, g / 4)
-         grid[g] = pos + glm::vec3((g + 1) / 2 % 2, g / 4, g / 2 % 2);
-      }
-
-      // Determine the configuration index
-      int config = 0;
-      for (int g = 0; g < 4; g++) config |= (sample(grid[vs[g]]) < lvl) << g;
-
-      for (int v, i = 0; (v = tetris[config] >> (7 - i) * 4 & 0xf) != 0xf; )
-      {
-         // Vertex position data
-         for (int d = 0; d < 3; d++)
+         // Populate the grid array
+         glm::vec3 grid[8];
+         for (int g = 0; g < 8; g++)
          {
-            positions.push_back(verterp2(lvl, grid[vs[v >> 2]], grid[vs[v & 3]])[d]);
+            // TODO fix this abomination (g % 2, g / 2 % 2, g / 4)
+            grid[g] = pos + glm::vec3((g + 1) / 2 % 2, g / 4, g / 2 % 2);
          }
 
-         // Vertex colour data
-         if (++i % 3 == 0)
+         // Determine the configuration index
+         int config = 0;
+         for (int g = 0; g < 4; g++) config |= (sample(grid[vs[t][g]]) < lvl)
+                                                                       << g;
+
+         for (int v, i = 0; (v = tetris[config] >> (7 - i) * 4 & 0xf) != 0xf; )
          {
-            glm::vec3 triPos = -position;
-            for (int c = 0; c < 9; c++)
+            // Vertex position data
+            for (int d = 0; d < 3; d++)
             {
-               triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
+               positions.push_back(verterp2(lvl, grid[vs[t][v >> 2]],
+                                                 grid[vs[t][v & 3]])[d]);
             }
 
-            for (int c = 0; c < 9; c++)
+            // Vertex colour data
+            if (++i % 3 == 0)
             {
-               glm::vec3 offset(0);
-               offset[c % 3] = 9000;
-               colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
+               glm::vec3 triPos = -position;
+               for (int c = 0; c < 9; c++)
+               {
+                  triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
+               }
+
+               for (int c = 0; c < 9; c++)
+               {
+                  glm::vec3 offset(0);
+                  offset[c % 3] = 9000;
+                  colours.push_back(glm::abs(noise(triPos / CSCALE + offset)));
+               }
             }
          }
       }
