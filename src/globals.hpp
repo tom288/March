@@ -18,7 +18,7 @@
 #define RAW_INPUT 1
 
 // Chunk side length
-#define CHUNK_SIZE 16
+#define CHUNK_SIZE 8
 
 // Number of chunks along each axis
 #define WORLD_SIZE 8

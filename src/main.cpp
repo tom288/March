@@ -85,7 +85,7 @@ GLFWwindow* makeWindow(const char* title)
    glfwSetScrollCallback(window, scrollCallback);
 
    // Ignore hidden triangles
-   // glEnable(GL_CULL_FACE); TODO uncomment
+   glEnable(GL_CULL_FACE);
    glEnable(GL_DEPTH_TEST);
 
    // Configure vertical sync
