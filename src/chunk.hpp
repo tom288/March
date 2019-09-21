@@ -164,6 +164,7 @@ class Chunk
                double oldSample = sample(w);
 
                dug[i] += glm::clamp(a, -old, 255 - old);
+               // First check is redundant but far more efficient
                if (dug[i] != old && sample(w) != oldSample) changed = true;
             }
 
@@ -274,12 +275,14 @@ private:
          // Vertex colour data
          if (++i % 3 == 0)
          {
+            // Get the average position of the triangle vertices
             glm::vec3 triPos = -position;
             for (int c = 0; c < 9; c++)
             {
                triPos[c % 3] += positions[positions.size() - 9 + c] / 3.0f;
             }
 
+            // Use the triangle position to sample arbitrary gradient noise
             for (int c = 0; c < 9; c++)
             {
                glm::vec3 offset(0);
