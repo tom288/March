@@ -7,7 +7,7 @@
 #include <iomanip>
 #include "osn.h"
 
-// Triangulation table for all possible configurations
+// Triangulation table for all possible cube configurations
 static const GLuint64 tris[256] = {
 0xffffffffffffffff, 0x083fffffffffffff, 0x019fffffffffffff, 0x183981ffffffffff,
 0x12afffffffffffff, 0x08312affffffffff, 0x92a029ffffffffff, 0x2832a8a98fffffff,
@@ -296,7 +296,7 @@ private:
    // TODO comment, rename
    void polygonise2(glm::vec3 pos, double lvl)
    {
-      // TODO comment and fix face direction
+      // Triangles for tetrahedral marching TODO fix face direction?
       const GLuint tetris[16] = {
          0xffffffff, 0x123fffff, 0x176fffff, 0x372762ff,
          0x26bfffff, 0x1b31b6ff, 0x17b1b2ff, 0x37bfffff,
