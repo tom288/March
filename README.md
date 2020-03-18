@@ -16,11 +16,3 @@
 1. GLM 0.9.9.5
 2. GLEW 2.1.0
 3. GLFW 3.3
-
-## Code style
-1. Use 3 space indentation
-2. `if (...) {` on one line is bad
-3. `if(` with no space is even worse
-4. Comments begin & end with spaces
-5. `SCREAMING_SNAKE_CASE` constants
-6. `PascalCase` classes, `camelCase` others
