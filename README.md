@@ -1,5 +1,7 @@
 # Marching Cubes Experiment
 
+[Demo video](https://www.youtube.com/watch?v=yvjj7Xs-3U8)
+
 ## How to install on windows
 1. Clone repo to local directory
 2. [Install MinGW](https://sourceforge.net/projects/mingw-w64/)
