@@ -2,7 +2,7 @@
 
 ### [Demo video](https://www.youtube.com/watch?v=yvjj7Xs-3U8)
 
-## How to install on windows
+## Windows Installation
 1. Clone repo to local directory
 2. [Install MinGW](https://sourceforge.net/projects/mingw-w64/)
 3. Install libs
@@ -14,7 +14,7 @@
       and put `glfw...WIN64.zip/glfw...` in `/lib` as `/lib/glfw`
 4. Run build.cmd
 
-## Library versions used by me 27/05/2019
+## Library Versions
 1. GLM 0.9.9.5
 2. GLEW 2.1.0
 3. GLFW 3.3
